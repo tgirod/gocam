@@ -125,19 +125,24 @@ func (doc *Document) String() string {
 
 // Join a path to an existing one if possible, otherwise append it to the list
 func (doc *Document) AddPath(add *Path) {
-	joined := false
-	for i := 0; i < doc.Len() && !joined; i++ {
+	inserted := false
+	for i := 0; i < doc.Len() && !inserted; i++ {
 		cur := &doc.Paths[i]
 		if !cur.IsClosed() {
 			if cur.End.Equals(add.Start()) {
 				// CUR -> ADD
 				cur.Join(add)
-				add = cur
-				joined = true
+				inserted = true
+			} else if add.End.Equals(cur.Start()) {
+				// ADD -> CUR
+				add.Join(cur)
+				doc.Paths[i] = *add
+				inserted = true
 			}
 		}
 	}
-	if !joined {
+
+	if !inserted {
 		// add cannot be joined to any existing path
 		doc.Paths = append(doc.Paths, *add)
 	}
