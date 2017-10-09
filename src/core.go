@@ -67,6 +67,7 @@ func (p *Path) AppendMove(m Mover) {
 func (p *Path) Join(q *Path) {
 	p.Moves = append(p.Moves, q.Moves...)
 	p.End = q.End
+	p.Handle = fmt.Sprintf("%s->%s", p.Handle, q.Handle)
 }
 
 func (p *Path) Reverse() {
