@@ -93,10 +93,14 @@ func (p *Path) IsClosed() bool {
 
 func (p *Path) IsClockwise() bool {
 	sum := 0.0
-	for i := 1; i < p.Len(); i++ {
+	for i := 0; i < p.Len(); i++ {
 		cur := p.Moves[i].Start()
-		prev := p.Moves[i-1].Start()
-		sum += (cur.X - prev.X) * (cur.Y - prev.Y)
+		next := p.End
+		if i < p.Len()-1 {
+			next = p.Moves[i+1].Start()
+		}
+		prod := (next.X - cur.X) * (next.Y + cur.Y)
+		sum += prod
 	}
 	// the curve is CW if the sum is positive, CCW if the sum is negative
 	return sum > 0
