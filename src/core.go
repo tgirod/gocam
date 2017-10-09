@@ -122,8 +122,24 @@ func (doc *Document) String() string {
 	return strings.Join(l, "\n")
 }
 
-func (doc *Document) AppendPath(p Path) {
-	doc.Paths = append(doc.Paths, p)
+// Join a path to an existing one if possible, otherwise append it to the list
+func (doc *Document) AddPath(add *Path) {
+	joined := false
+	for i := 0; i < doc.Len() && !joined; i++ {
+		cur := &doc.Paths[i]
+		if !cur.IsClosed() {
+			if cur.End.Equals(add.Start()) {
+				// CUR -> ADD
+				cur.Join(add)
+				add = cur
+				joined = true
+			}
+		}
+	}
+	if !joined {
+		// add cannot be joined to any existing path
+		doc.Paths = append(doc.Paths, *add)
+	}
 }
 
 func (doc *Document) RemovePath(idx int) {

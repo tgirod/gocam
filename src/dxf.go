@@ -83,7 +83,8 @@ func NewDocumentFromDxf(dxf *document.DxfDocument) *Document {
 			//fmt.Printf("importing %T %s\n", e, e.Handle)
 			path = NewArc(e)
 		}
-		doc.Paths = append(doc.Paths, *path)
+
+		doc.AddPath(path)
 	}
 	return doc
 }
