@@ -64,10 +64,9 @@ func (p *Path) AppendMove(m Mover) {
 	p.Moves = append(p.Moves, m)
 }
 
-func (p *Path) AppendMoves(ms ...Mover) {
-	for _, m := range ms {
-		p.AppendMove(m)
-	}
+func (p *Path) Join(q *Path) {
+	p.Moves = append(p.Moves, q.Moves...)
+	p.End = q.End
 }
 
 func (p *Path) Reverse() {
