@@ -48,15 +48,17 @@ func NewLWPolyline(e *entities.LWPolyline) *Path {
 
 func NewArc(e *entities.Arc) *Path {
 	center := NewVec(e.Center)
-	start := pol2car(e.Radius, e.StartAngle).Add(center)
-	end := pol2car(e.Radius, e.EndAngle).Add(center)
+	startAngle := Radians(e.StartAngle)
+	endAngle := Radians(e.EndAngle)
+	if endAngle < startAngle {
+		endAngle += math.Pi * 2
+	}
+	radius := e.Radius
 
-	// bulge conversion
-	theta := e.EndAngle - e.StartAngle
-	bulge := math.Tan(theta / 4)
+	startPoint, endPoint, bulge := ArcToBulge(center, radius, startAngle, endAngle)
 
-	path := NewPath(end, e.Handle)
-	path.AppendMove(&Line{start, bulge})
+	path := NewPath(endPoint, e.Handle)
+	path.AppendMove(&Line{startPoint, bulge})
 	return path
 }
 

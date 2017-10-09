@@ -106,6 +106,18 @@ type Document struct {
 	Paths []Path
 }
 
+func (doc *Document) Len() int {
+	return len(doc.Paths)
+}
+
+func (doc *Document) String() string {
+	l := make([]string, doc.Len())
+	for i, m := range doc.Paths {
+		l[i] = fmt.Sprintf("%s", m)
+	}
+	return strings.Join(l, "\n")
+}
+
 func (doc *Document) AppendPath(p Path) {
 	doc.Paths = append(doc.Paths, p)
 }
@@ -118,19 +130,16 @@ func (doc *Document) RemovePath(idx int) {
 
 func (doc *Document) Regroup() {
 	for i := 0; i < len(doc.Paths); i++ {
-		//fmt.Printf("Number of paths: %d\n", len(doc.Paths))
 		cur := &doc.Paths[i]
 		if !cur.IsClosed() {
 			end := cur.End
-			//fmt.Printf("searching for a follower for %s starting at %v\n", cur.Handle, end)
 			// search for a path that starts at "end" and join it to "cur"
 			for j, _ := range doc.Paths {
 				path := &doc.Paths[j]
 				start := path.Start()
 				if !path.IsClosed() && start.Equals(end) {
-					//fmt.Printf("found %s, starting at %v\n", p.Handle, p.Start())
 					// joining paths
-					cur.AppendMoves(path.Moves...)
+					cur.Join(path)
 					doc.RemovePath(j)
 					// a path has been joined to cur. Let's try again
 					i--

@@ -12,7 +12,7 @@ func (p *Path) Gcode() []gcode.Block {
 	var blocks = make([]gcode.Block, p.Len()+2)
 
 	// add comment
-	comm := &gcode.Comment{fmt.Sprintf("(Block-name: %s)", p.Handle), false}
+	comm := &gcode.Comment{fmt.Sprintf("Block-name: %s", p.Handle), false}
 	blocks[0] = gcode.Block{[]gcode.Node{comm}, false}
 	// initial G0 move
 	blocks[1] = gcode.Block{}
@@ -39,20 +39,20 @@ func (p *Path) Gcode() []gcode.Block {
 				b.AppendNode(&gcode.Word{'X', end.X})
 				b.AppendNode(&gcode.Word{'Y', end.Y})
 			} else {
-				if move.Bulge < 0 {
+				if move.Bulge > 0 {
 					// CCW arc
-					b.AppendNode(&gcode.Word{'G', 3}) // CCW arc
+					b.AppendNode(&gcode.Word{'G', 3})
 				} else {
 					// CW arc
-					b.AppendNode(&gcode.Word{'G', 2}) // CW arc
+					b.AppendNode(&gcode.Word{'G', 2})
 				}
 				// arc's endpoint
 				b.AppendNode(&gcode.Word{'X', end.X})
 				b.AppendNode(&gcode.Word{'Y', end.Y})
 				// center (absolute)
-				c, _, _, _ := convertBulge(move.Start(), end, move.Bulge)
+				c, _, _, _ := BulgeToArc(move.Start(), end, move.Bulge)
 				// center (relative to the start)
-				c = move.Start().Sub(c)
+				c = c.Sub(move.Start())
 
 				b.AppendNode(&gcode.Word{'I', c.X})
 				b.AppendNode(&gcode.Word{'J', c.Y})
