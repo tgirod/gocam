@@ -84,7 +84,7 @@ func NewDocumentFromDxf(dxf *document.DxfDocument) *Document {
 			path = NewArc(e)
 		}
 
-		doc.AddPath(path)
+		doc.JoinPath(path)
 	}
 	return doc
 }

@@ -123,29 +123,51 @@ func (doc *Document) String() string {
 	return strings.Join(l, "\n")
 }
 
-// Join a path to an existing one if possible, otherwise append it to the list
-func (doc *Document) AddPath(add *Path) {
-	inserted := false
-	for i := 0; i < doc.Len() && !inserted; i++ {
+func (doc *Document) JoinPath(path *Path) {
+	// search for prepending and appending paths
+	pre := -1
+	post := -1
+
+	for i := 0; i < doc.Len() && (pre == -1 || post == -1); i++ {
 		cur := &doc.Paths[i]
-		if !cur.IsClosed() {
-			if cur.End.Equals(add.Start()) {
-				// CUR -> ADD
-				cur.Join(add)
-				inserted = true
-			} else if add.End.Equals(cur.Start()) {
-				// ADD -> CUR
-				add.Join(cur)
-				doc.Paths[i] = *add
-				inserted = true
-			}
+		if !cur.IsClosed() && cur.End.Equals(path.Start()) {
+			// found prepending path
+			pre = i
+		}
+		if !cur.IsClosed() && path.End.Equals(cur.Start()) {
+			// found appending path
+			post = i
 		}
 	}
 
-	if !inserted {
-		// add cannot be joined to any existing path
-		doc.Paths = append(doc.Paths, *add)
+	if pre == -1 && post == -1 {
+		// isolated path
+		// xxx -> PATH -> xxx
+		doc.AppendPath(path)
+	} else if post == -1 {
+		// prepending path only
+		// PRE -> PATH
+		doc.Paths[pre].Join(path)
+	} else if pre == -1 {
+		// appending path only
+		// PATH -> POST
+		path.Join(&doc.Paths[post])
+		doc.Paths[post] = *path
+	} else if pre == post {
+		// loop-closing path
+		// PREPOST -> PATH
+		doc.Paths[pre].Join(path)
+	} else {
+		// prepending and appending paths
+		// PRE -> PATH -> POST
+		doc.Paths[pre].Join(path)
+		doc.Paths[pre].Join(&doc.Paths[post])
+		doc.RemovePath(post)
 	}
+}
+
+func (doc *Document) AppendPath(p *Path) {
+	doc.Paths = append(doc.Paths, *p)
 }
 
 func (doc *Document) RemovePath(idx int) {
