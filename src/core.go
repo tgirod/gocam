@@ -85,6 +85,13 @@ func (p *Path) Reverse() {
 		for i, j := 0, p.Len()-1; i < j; i, j = i+1, j-1 {
 			p.Moves[i], p.Moves[j] = p.Moves[j], p.Moves[i]
 		}
+
+		// reverse Handle
+		h := strings.Split(p.Handle, "->")
+		for i, j := 0, len(h)-1; i < j; i, j = i+1, j-1 {
+			h[i], h[j] = h[j], h[i]
+		}
+		p.Handle = strings.Join(h, "->")
 	}
 }
 
