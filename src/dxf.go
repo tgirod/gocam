@@ -27,7 +27,7 @@ func NewPolyline(e *entities.Polyline) *Path {
 	end := NewVec(e.Vertices[len(e.Vertices)-1].Location)
 	path := NewPath(end, e.Handle)
 	// move along vertices
-	for _, v := range e.Vertices {
+	for _, v := range e.Vertices[:len(e.Vertices)-1] {
 		start := NewVec(v.Location)
 		path.AppendMove(&Line{start, 0})
 	}
@@ -38,7 +38,7 @@ func NewLWPolyline(e *entities.LWPolyline) *Path {
 	end := NewVec(e.Points[len(e.Points)-1].Point)
 	path := NewPath(end, e.Handle)
 	// move along vertices
-	for _, p := range e.Points {
+	for _, p := range e.Points[:len(e.Points)-1] {
 		start := NewVec(p.Point)
 		bulge := p.Bulge
 		path.AppendMove(&Line{start, bulge})
