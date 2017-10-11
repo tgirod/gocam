@@ -125,7 +125,7 @@ func (doc *Document) Len() int {
 func (doc *Document) String() string {
 	l := make([]string, doc.Len())
 	for i, m := range doc.Paths {
-		l[i] = fmt.Sprintf("%s", m)
+		l[i] = fmt.Sprintf("%s", &m)
 	}
 	return strings.Join(l, "\n")
 }
