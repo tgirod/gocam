@@ -2,10 +2,14 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"math"
+	"os"
 )
 
 const PRECISION = 5
+
+var Log *log.Logger = log.New(os.Stderr, "", 0)
 
 type Vec struct {
 	X, Y float64
