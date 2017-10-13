@@ -24,24 +24,24 @@ func NewLine(e *entities.Line) *Path {
 }
 
 func NewPolyline(e *entities.Polyline) *Path {
-	end := NewVec(e.Vertices[len(e.Vertices)-1].Location)
-	path := NewPath(end, e.Handle)
+	start := NewVec(e.Vertices[0].Location)
+	path := NewPath(start, e.Handle)
 	// move along vertices
-	for _, v := range e.Vertices[:len(e.Vertices)-1] {
-		start := NewVec(v.Location)
-		path.AppendMove(&Line{start, 0})
+	for _, v := range e.Vertices[1:] {
+		end := NewVec(v.Location)
+		path.AppendMove(&Line{end, 0})
 	}
 	return path
 }
 
 func NewLWPolyline(e *entities.LWPolyline) *Path {
-	end := NewVec(e.Points[len(e.Points)-1].Point)
-	path := NewPath(end, e.Handle)
+	start := NewVec(e.Points[0].Point)
+	path := NewPath(start, e.Handle)
 	// move along vertices
-	for _, p := range e.Points[:len(e.Points)-1] {
-		start := NewVec(p.Point)
+	for _, p := range e.Points[1:] {
+		end := NewVec(p.Point)
 		bulge := p.Bulge
-		path.AppendMove(&Line{start, bulge})
+		path.AppendMove(&Line{end, bulge})
 	}
 	return path
 }
@@ -57,8 +57,8 @@ func NewArc(e *entities.Arc) *Path {
 
 	startPoint, endPoint, bulge := ArcToBulge(center, radius, startAngle, endAngle)
 
-	path := NewPath(endPoint, e.Handle)
-	path.AppendMove(&Line{startPoint, bulge})
+	path := NewPath(startPoint, e.Handle)
+	path.AppendMove(&Line{endPoint, bulge})
 	return path
 }
 

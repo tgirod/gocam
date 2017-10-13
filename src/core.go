@@ -6,45 +6,45 @@ import (
 )
 
 type Mover interface {
-	Start() Vec  // returns the coordinates of the move's start
+	End() Vec    // returns the coordinates of the move's endpoint
 	Reverse(Vec) // reverse the move toward the given coordinates
 }
 
 type Line struct {
-	From  Vec
+	To    Vec
 	Bulge float64
 }
 
 func (l *Line) String() string {
-	return fmt.Sprintf("Line: %s,%.2f", l.From, l.Bulge)
+	return fmt.Sprintf("Line: %s,%.2f", l.To, l.Bulge)
 }
 
-func (l *Line) Start() Vec {
-	return l.From
+func (l *Line) End() Vec {
+	return l.To
 }
 
 func (l *Line) Reverse(v Vec) {
-	l.From = v
+	l.To = v
 	l.Bulge = -l.Bulge
 }
 
 type Path struct {
 	Handle string  // a name for this path
 	Moves  []Mover // a sequence of moves to form a path
-	End    Vec     // endpoint of the path
+	Start  Vec     // startpoint of the path
 }
 
-func NewPath(end Vec, handle string) *Path {
-	return &Path{handle, []Mover{}, end}
+func NewPath(start Vec, handle string) *Path {
+	return &Path{handle, []Mover{}, start}
 }
 
 func (p *Path) String() string {
 	l := make([]string, p.Len()+2)
 	l[0] = fmt.Sprintf("Path %s:", p.Handle)
+	l[1] = fmt.Sprintf("\tStart: %s", p.Start)
 	for i, m := range p.Moves {
-		l[i+1] = fmt.Sprintf("\t%s", m)
+		l[i+2] = fmt.Sprintf("\t%s", m)
 	}
-	l[p.Len()+1] = fmt.Sprintf("\tEnd: %s", p.End)
 	return strings.Join(l, "\n")
 }
 
@@ -52,11 +52,11 @@ func (p *Path) Len() int {
 	return len(p.Moves)
 }
 
-func (p *Path) Start() Vec {
+func (p *Path) End() Vec {
 	if p.Len() > 0 {
-		return p.Moves[0].Start()
+		return p.Moves[p.Len()-1].End()
 	} else {
-		return p.End
+		return p.Start
 	}
 }
 
@@ -66,27 +66,27 @@ func (p *Path) AppendMove(m Mover) {
 
 func (p *Path) Join(q *Path) {
 	p.Moves = append(p.Moves, q.Moves...)
-	p.End = q.End
 	p.Handle = fmt.Sprintf("%s->%s", p.Handle, q.Handle)
 }
 
 func (p *Path) Reverse() {
 	if p.Len() > 0 {
+		// saving endpoint before overwriting
+		start := p.Moves[p.Len()-1].End()
 
-		// reverse each move
-		start := p.Start()
-		for i := 0; i < p.Len()-1; i++ {
-			p.Moves[i].Reverse(p.Moves[i+1].Start())
+		// reversing each move
+		p.Moves[0].Reverse(p.Start)
+		for i := 1; i < p.Len(); i++ {
+			p.Moves[i].Reverse(p.Moves[i-1].End())
 		}
-		p.Moves[p.Len()-1].Reverse(p.End)
-		p.End = start
+		p.Start = start
 
-		// reverse the order of the moves
+		// reversing the order of the moves
 		for i, j := 0, p.Len()-1; i < j; i, j = i+1, j-1 {
 			p.Moves[i], p.Moves[j] = p.Moves[j], p.Moves[i]
 		}
 
-		// reverse Handle
+		// reversing Handle
 		h := strings.Split(p.Handle, "->")
 		for i, j := 0, len(h)-1; i < j; i, j = i+1, j-1 {
 			h[i], h[j] = h[j], h[i]
@@ -96,18 +96,23 @@ func (p *Path) Reverse() {
 }
 
 func (p *Path) IsClosed() bool {
-	return p.Start().Equals(p.End)
+	return p.Start.Equals(p.End())
 }
 
+// This method is using the shoelace algorithm to determine if the path is
+// clockwise or counter-clockwise.
 func (p *Path) IsClockwise() bool {
 	sum := 0.0
+	var cur, prev Vec
 	for i := 0; i < p.Len(); i++ {
-		cur := p.Moves[i].Start()
-		next := p.End
-		if i < p.Len()-1 {
-			next = p.Moves[i+1].Start()
+		if i == 0 {
+			prev = p.Start
+		} else {
+			prev = p.Moves[i-1].End()
 		}
-		prod := (next.X - cur.X) * (next.Y + cur.Y)
+		cur = p.Moves[i].End()
+
+		prod := (cur.X - prev.X) * (cur.Y + prev.Y)
 		sum += prod
 	}
 	// the curve is CW if the sum is positive, CCW if the sum is negative
@@ -157,11 +162,11 @@ func (doc *Document) JoinPath(path *Path) {
 
 		for i := 0; i < doc.Len() && (pre == -1 || post == -1); i++ {
 			cur := &doc.Paths[i]
-			if !cur.IsClosed() && cur.End.Equals(path.Start()) {
+			if !cur.IsClosed() && cur.End().Equals(path.Start) {
 				// found prepending path
 				pre = i
 			}
-			if !cur.IsClosed() && path.End.Equals(cur.Start()) {
+			if !cur.IsClosed() && path.End().Equals(cur.Start) {
 				// found appending path
 				post = i
 			}

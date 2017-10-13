@@ -17,19 +17,21 @@ func (p *Path) Gcode() []gcode.Block {
 	// initial G0 move
 	blocks[1] = gcode.Block{}
 	blocks[1].AppendNode(&gcode.Word{'G', 0})
-	blocks[1].AppendNode(&gcode.Word{'X', p.Start().X})
-	blocks[1].AppendNode(&gcode.Word{'Y', p.Start().Y})
+	blocks[1].AppendNode(&gcode.Word{'X', p.Start.X})
+	blocks[1].AppendNode(&gcode.Word{'Y', p.Start.Y})
 
+	var start, end Vec
 	// convert moves to gcode
 	for i := 0; i < p.Len(); i++ {
-		cur := p.Moves[i]
-		end := p.End
-		if i < p.Len()-1 {
-			end = p.Moves[i+1].Start()
+		if i == 0 {
+			start = p.Start
+		} else {
+			start = p.Moves[i-1].End()
 		}
-		b := gcode.Block{}
+		end = p.Moves[i].End()
 
-		switch move := cur.(type) {
+		b := gcode.Block{}
+		switch move := p.Moves[i].(type) {
 		default:
 			panic("this should not happen")
 		case *Line:
@@ -50,9 +52,9 @@ func (p *Path) Gcode() []gcode.Block {
 				b.AppendNode(&gcode.Word{'X', end.X})
 				b.AppendNode(&gcode.Word{'Y', end.Y})
 				// center (absolute)
-				c, _, _, _ := BulgeToArc(move.Start(), end, move.Bulge)
+				c, _, _, _ := BulgeToArc(start, end, move.Bulge)
 				// center (relative to the start)
-				c = c.Sub(move.Start())
+				c = c.Sub(start)
 
 				b.AppendNode(&gcode.Word{'I', c.X})
 				b.AppendNode(&gcode.Word{'J', c.Y})
