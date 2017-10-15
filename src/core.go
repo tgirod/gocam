@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"strings"
 )
 
@@ -26,6 +27,25 @@ func (l *Line) End() Vec {
 func (l *Line) Reverse(v Vec) {
 	l.To = v
 	l.Bulge = -l.Bulge
+}
+
+// this method returns the angle formed by the tangent at the endpoint of the
+// line.
+func (l *Line) EndAngle(from Vec) float64 {
+	var angle float64
+	if l.Bulge == 0 {
+		// straight line
+		angle = l.To.Sub(from).Angle()
+	} else if l.Bulge > 0 {
+		// CCW arc
+		_, _, angle, _ := BulgeToArc(from, l.To, l.Bulge)
+		angle += math.Pi / 2
+	} else {
+		// CW arc
+		_, _, angle, _ := BulgeToArc(from, l.To, l.Bulge)
+		angle -= math.Pi / 2
+	}
+	return angle
 }
 
 type Path struct {
