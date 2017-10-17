@@ -1,3 +1,3 @@
 default:
-	go build -o gocam src/*.go
+	go build -o gocam *.go
 
