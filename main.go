@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/rpaloschi/dxf-go/document"
+	"github.com/tgirod/gocam/core"
 )
 
 func main() {
@@ -15,22 +15,10 @@ func main() {
 		log.Fatal(err)
 	}
 
-	dxf, err := document.DxfDocumentFromStream(file)
-	if err != nil {
+	if mod, err := core.LoadDxf(file); err == nil {
+		//core.Log.Println(mod)
+		fmt.Println(mod.Gcode().Export(5))
+	} else {
 		log.Fatal(err)
 	}
-
-	doc := NewDocumentFromDxf(dxf)
-	doc.Regroup()
-	//fmt.Println(doc)
-	for _, p := range doc.Paths {
-		fmt.Printf("%s: closed:%t, clockwise:%t\n", p.Handle, p.IsClosed(), p.IsClockwise())
-	}
-
-	//fmt.Println(doc.Gcode().Export(5))
 }
-
-//func main() {
-//fmt.Println(ArcToBulge(Vec{0, 0}, 100, 0, Radians(180)))
-//fmt.Println(BulgeToArc(Vec{100, 0}, Vec{-100, 0}, 1))
-//}
