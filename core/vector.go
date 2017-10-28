@@ -12,7 +12,7 @@ type Vector struct {
 }
 
 func (v Vector) String() string {
-	return fmt.Sprintf("(%.2f, s%.2f)", v.X, v.Y)
+	return fmt.Sprintf("(%.2f, %.2f)", v.X, v.Y)
 }
 
 func (v Vector) Sum(o Vector) Vector {
