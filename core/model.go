@@ -5,11 +5,12 @@ import (
 	"strings"
 )
 
-// A model is a list of paths
+// Model is a list of paths
 type Model struct {
 	Paths []Path
 }
 
+// Len returns the number of paths in the model
 func (mod *Model) Len() int {
 	return len(mod.Paths)
 }
@@ -22,20 +23,22 @@ func (mod *Model) String() string {
 	return strings.Join(l, "\n")
 }
 
+// Append adds a path to the model
 func (mod *Model) Append(p *Path) {
 	mod.Paths = append(mod.Paths, *p)
 }
 
+// Remove deletes the path at index idx from the model and returns it
 func (mod *Model) Remove(idx int) *Path {
 	p := &mod.Paths[idx]
 	mod.Paths = append(mod.Paths[:idx], mod.Paths[idx+1:]...)
 	return p
 }
 
-// Add a path to the model. This method will try to join the new path to the
-// existing ones by looking for possible prepending and appending paths. Paths
-// will be joined as necessary.
-func (mod *Model) AddPath(path *Path) {
+// JoinPath adds a path to the model. Instead of appending the path to the
+// model, this method is searching for open prepending and appending paths in
+// order to join the new path to existing ones
+func (mod *Model) JoinPath(path *Path) {
 	Log.Printf("adding path %s\n", path.Name)
 	if path.IsClosed() {
 		if path.IsClockwise() {

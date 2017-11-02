@@ -5,11 +5,13 @@ import (
 	"strings"
 )
 
+// Path is a continuous sequence of lines, ie Lines[i].To == Lines[i+1].From
 type Path struct {
 	Name  string // a name for this path
 	Lines []Line // a sequence of lines to form a path
 }
 
+// NewPath creates a new empty path
 func NewPath(name string) *Path {
 	return &Path{name, []Line{}}
 }
@@ -23,27 +25,34 @@ func (p *Path) String() string {
 	return strings.Join(s, "\n")
 }
 
+// Len returns the number of lines in the path
 func (p *Path) Len() int {
 	return len(p.Lines)
 }
 
+// Start returns the starting point of a non-empty path
 func (p *Path) Start() Vector {
-	return p.Lines[0].Start()
+	return p.Lines[0].From
 }
 
+// End returns the ending point of a non-empty path
 func (p *Path) End() Vector {
-	return p.Lines[p.Len()-1].End()
+	return p.Lines[p.Len()-1].To
 }
 
+// Append adds a line at the end of the path
 func (p *Path) Append(l Line) {
 	p.Lines = append(p.Lines, l)
 }
 
+// Join appends the path q to the path p
 func (p *Path) Join(q *Path) {
 	p.Lines = append(p.Lines, q.Lines...)
 	p.Name = fmt.Sprintf("%s->%s", p.Name, q.Name)
 }
 
+// Reverse reverts path p by calling reverse on each line, then reversing the
+// order of the lines
 func (p *Path) Reverse() {
 	if p.Len() > 0 {
 		// reversing each line
@@ -65,32 +74,32 @@ func (p *Path) Reverse() {
 	}
 }
 
+// IsClosed returns true if the starting and ending points of the path are
+// equals
 func (p *Path) IsClosed() bool {
 	return p.Start().Equals(p.End())
 }
 
-// This method is using the shoelace algorithm to determine if the path is
-// clockwise or counter-clockwise.
+// IsClockwise returns true if the path is running clockwise, false otherwise.
+// The shoelace algorithm is used to determine the direction of rotation
 func (p *Path) IsClockwise() bool {
 	sum := 0.0
 	for _, l := range p.Lines {
-		start := l.Start()
-		end := l.End()
-		sum += (end.X - start.X) * (end.Y + start.Y)
+		sum += (l.To.X - l.From.X) * (l.To.Y + l.From.Y)
 	}
 	// the curve is CW if the sum is positive, CCW if the sum is negative
 	return sum > 0
 }
 
-// If the path is closed, StartNear(v) will choose the vertex closest to v as a
-// starting point for the path
+// StartNear modifies the order of the lines of path p so the starting point is
+// as close as possible to vector v. If the path is open, nothing is changed.
 func (p *Path) StartNear(v Vector) {
 	if p.Len() > 0 && p.IsClosed() {
 		// find the closest vertex
 		index := 0
-		closest := v.Diff(p.Lines[0].Start()).Norm()
+		closest := v.Diff(p.Lines[0].From).Norm()
 		for i := 1; i < p.Len(); i++ {
-			current := v.Diff(p.Lines[i].Start()).Norm()
+			current := v.Diff(p.Lines[i].From).Norm()
 			if current < closest {
 				index = i
 				closest = current

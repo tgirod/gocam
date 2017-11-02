@@ -12,7 +12,9 @@ import (
 	"github.com/rpaloschi/dxf-go/entities"
 )
 
-func LoadDxf(stream io.Reader) (*Model, error) {
+// ImportDXF a stream to a DXF file and returns a model or an error if the
+// import process went wrong
+func ImportDXF(stream io.Reader) (*Model, error) {
 	dxf, err := document.DxfDocumentFromStream(stream)
 	if err != nil {
 		return nil, err
@@ -39,15 +41,17 @@ func LoadDxf(stream io.Reader) (*Model, error) {
 			path = NewArc(e)
 		}
 
-		mod.AddPath(path)
+		mod.JoinPath(path)
 	}
 	return mod, nil
 }
 
+// NewVector converts a Point object to a Vector
 func NewVector(p core.Point) Vector {
 	return Vector{p.X, p.Y}
 }
 
+// NewLine converts a Line entity to a path
 func NewLine(e *entities.Line) *Path {
 	start := NewVector(e.Start)
 	end := NewVector(e.End)
@@ -56,6 +60,7 @@ func NewLine(e *entities.Line) *Path {
 	return path
 }
 
+// NewPolyline converts a polyline entity to a path
 func NewPolyline(e *entities.Polyline) *Path {
 	path := NewPath(e.Handle)
 	// move along vertices
@@ -68,6 +73,7 @@ func NewPolyline(e *entities.Polyline) *Path {
 	return path
 }
 
+// NewLWPolyline converts a LWpolyline entity to a path
 func NewLWPolyline(e *entities.LWPolyline) *Path {
 	path := NewPath(e.Handle)
 	// move along vertices
@@ -81,6 +87,7 @@ func NewLWPolyline(e *entities.LWPolyline) *Path {
 	return path
 }
 
+// NewArc converts a Arc entity to a path. The arc is converted to line+bulge format
 func NewArc(e *entities.Arc) *Path {
 	center := NewVector(e.Center)
 	startAngle := Radians(e.StartAngle)

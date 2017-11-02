@@ -15,7 +15,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if mod, err := core.LoadDxf(file); err == nil {
+	if mod, err := core.ImportDXF(file); err == nil {
 		//core.Log.Println(mod)
 		fmt.Println(mod.Gcode().Export(5))
 	} else {

@@ -6,14 +6,15 @@ import (
 	"os"
 )
 
-var Log *log.Logger = log.New(os.Stderr, "", 0)
+// Log is used to print logs to stderr.
+var Log *log.Logger = log.New(os.Stderr, "Gocam: ", 0)
 
-// converts degrees to radians
+// Radians converts degrees to radians.
 func Radians(angle float64) float64 {
 	return angle / 180 * math.Pi
 }
 
-// cartesian coordinates from polar
+// Cartesian converts polar coordinates to cartesian.
 func Cartesian(angle float64, radius float64) Vector {
 	p := Vector{}
 	p.X = radius * math.Cos(angle)
@@ -21,15 +22,16 @@ func Cartesian(angle float64, radius float64) Vector {
 	return p
 }
 
-// polar coordinates (angle, radius) from cartesian
+// Polar converts cartesian coordinates to polar (angle, radius).
 func Polar(p Vector) (float64, float64) {
 	radius := math.Sqrt(math.Pow(p.X, 2) + math.Pow(p.Y, 2))
 	angle := math.Atan2(p.Y, p.X)
 	return angle, radius
 }
 
-// convert classical arc representation to (start,end,bulge) format. Angles
-// must be passed in radians.
+// ArcToBulge converts dxf arc representation (center, radius, and angles) to
+// line+bulge representation (start point, end point, and bulge). Angles are in
+// radians.
 // Bulge == 0: straight line
 // Bulge > 0: CCW arc
 // Bulge < 0: CW arc
@@ -43,8 +45,7 @@ func ArcToBulge(center Vector, radius float64, startAngle float64, endAngle floa
 	return startPoint, endPoint, bulge
 }
 
-// from a bulge representation of an arc, computes center, start angle, end angle and radius
-// usefull for gcode generation
+// BulgeToArc converts line+bulge arc representation to dxf representation.
 func BulgeToArc(p1 Vector, p2 Vector, bulge float64) (Vector, float64, float64, float64) {
 	theta2 := 2 * math.Atan(bulge)                // half of included angle
 	d := p2.Diff(p1).Norm() / 2                   // half of the chord length
@@ -53,7 +54,6 @@ func BulgeToArc(p1 Vector, p2 Vector, bulge float64) (Vector, float64, float64, 
 	c := Cartesian(math.Pi/2-theta2+a, r).Sum(p1) // center
 	if bulge < 0 {
 		return c, p2.Diff(c).Angle(), p1.Diff(c).Angle(), math.Abs(r)
-	} else {
-		return c, p1.Diff(c).Angle(), p2.Diff(c).Angle(), math.Abs(r)
 	}
+	return c, p1.Diff(c).Angle(), p2.Diff(c).Angle(), math.Abs(r)
 }

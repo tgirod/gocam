@@ -5,26 +5,15 @@ import (
 	"math"
 )
 
-type Mover interface {
-	Start() Vector // returns the coordinates of the move's startpoint
-	End() Vector   // returns the coordinates of the move's endpoint
-	Reverse()      // reverse the move
-}
-
+// Line represents a line between two points From and To. The line can be
+// either straight (if Bulge == 0) or an arc for others values of Bulge.
 type Line struct {
 	From  Vector
 	To    Vector
 	Bulge float64
 }
 
-func (l *Line) Start() Vector {
-	return l.From
-}
-
-func (l *Line) End() Vector {
-	return l.To
-}
-
+// Reverse reverses the line, taking the bulge into account
 func (l *Line) Reverse() {
 	l.From, l.To = l.To, l.From
 	l.Bulge = -l.Bulge
@@ -34,8 +23,7 @@ func (l *Line) String() string {
 	return fmt.Sprintf("Line: %v, %v, %.2f", l.From, l.To, l.Bulge)
 }
 
-// this method returns the angle formed by the tangent at the endpoint of the
-// line.
+// EndAngle returns the angle of the tangent at the endpoint of line l
 func (l *Line) EndAngle() float64 {
 	var angle float64
 	if l.Bulge == 0 {

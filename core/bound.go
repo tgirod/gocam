@@ -2,12 +2,14 @@ package core
 
 import "math"
 
+// Bounds is a rectangular bounding box defined by its lower-left and
+// upper-right corners
 type Bounds struct {
 	Lower Vector
 	Upper Vector
 }
 
-// returns the bounding box surrounding the line.
+// Bounds returns the bounding box surrounding the line.
 // FIXME: this does not take the bulge into account
 func (l *Line) Bounds() Bounds {
 	lower := Vector{
@@ -21,8 +23,9 @@ func (l *Line) Bounds() Bounds {
 	return Bounds{lower, upper}
 }
 
-// returns the bounding box surrounding the path by combining the bounding
-// boxes of each line
+// Bounds returns the bounding box surrounding the path by combining the
+// bounding boxes of each line
+// FIXME: l'algo sort un résultat qui est faux
 func (p *Path) Bounds() Bounds {
 	bounds := Bounds{} // default value
 
