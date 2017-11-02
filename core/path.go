@@ -32,12 +32,12 @@ func (p *Path) Len() int {
 
 // Start returns the starting point of a non-empty path
 func (p *Path) Start() Vector {
-	return p.Lines[0].From
+	return p.Lines[0].Start
 }
 
 // End returns the ending point of a non-empty path
 func (p *Path) End() Vector {
-	return p.Lines[p.Len()-1].To
+	return p.Lines[p.Len()-1].End
 }
 
 // Append adds a line at the end of the path
@@ -85,7 +85,7 @@ func (p *Path) IsClosed() bool {
 func (p *Path) IsClockwise() bool {
 	sum := 0.0
 	for _, l := range p.Lines {
-		sum += (l.To.X - l.From.X) * (l.To.Y + l.From.Y)
+		sum += (l.End.X - l.Start.X) * (l.End.Y + l.Start.Y)
 	}
 	// the curve is CW if the sum is positive, CCW if the sum is negative
 	return sum > 0
@@ -97,9 +97,9 @@ func (p *Path) StartNear(v Vector) {
 	if p.Len() > 0 && p.IsClosed() {
 		// find the closest vertex
 		index := 0
-		closest := v.Diff(p.Lines[0].From).Norm()
+		closest := v.Diff(p.Lines[0].Start).Norm()
 		for i := 1; i < p.Len(); i++ {
-			current := v.Diff(p.Lines[i].From).Norm()
+			current := v.Diff(p.Lines[i].Start).Norm()
 			if current < closest {
 				index = i
 				closest = current

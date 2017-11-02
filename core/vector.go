@@ -35,10 +35,17 @@ func (v Vector) Norm() float64 {
 	return math.Sqrt(v.X*v.X + v.Y*v.Y)
 }
 
+// Unit returns vector v divided by v.Norm()
+func (v Vector) Unit() Vector {
+	n := v.Norm()
+	return Vector{
+		X: v.X / n,
+		Y: v.Y / n}
+}
+
 // Equals tests if vectors v and o are sufficiently close to be considered
-// equal.
-// returns true if the distance between the two vectors is below tolerance,
-// otherwise false
+// equal. Returns true if the distance between the two vectors is below
+// tolerance, otherwise false
 func (v Vector) Equals(o Vector) bool {
 	return v.Diff(o).Norm() < tolerance
 }

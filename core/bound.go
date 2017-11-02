@@ -13,12 +13,12 @@ type Bounds struct {
 // FIXME: this does not take the bulge into account
 func (l *Line) Bounds() Bounds {
 	lower := Vector{
-		math.Min(l.From.X, l.To.X),
-		math.Min(l.From.Y, l.To.Y),
+		math.Min(l.Start.X, l.End.X),
+		math.Min(l.Start.Y, l.End.Y),
 	}
 	upper := Vector{
-		math.Max(l.From.X, l.To.X),
-		math.Max(l.From.Y, l.To.Y),
+		math.Max(l.Start.X, l.End.X),
+		math.Max(l.Start.Y, l.End.Y),
 	}
 	return Bounds{lower, upper}
 }

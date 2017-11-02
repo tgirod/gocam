@@ -48,8 +48,8 @@ func (p *Path) Gcode() []gcode.Block {
 			// straight line
 			b.AppendNodes(
 				word('G', 1),
-				word('X', l.To.X),
-				word('Y', l.To.Y))
+				word('X', l.End.X),
+				word('Y', l.End.Y))
 		} else {
 			if l.Bulge > 0 {
 				// CCW arc
@@ -59,12 +59,12 @@ func (p *Path) Gcode() []gcode.Block {
 				b.AppendNode(word('G', 2))
 			}
 			// arc's endpoint
-			b.AppendNode(word('X', l.To.X))
-			b.AppendNode(word('Y', l.To.Y))
+			b.AppendNode(word('X', l.End.X))
+			b.AppendNode(word('Y', l.End.Y))
 			// center (absolute)
-			c, _, _, _ := BulgeToArc(l.From, l.To, l.Bulge)
+			c, _, _, _ := BulgeToArc(l.Start, l.End, l.Bulge)
 			// center (relative to the start)
-			c = c.Diff(l.From)
+			c = c.Diff(l.Start)
 
 			b.AppendNode(word('I', c.X))
 			b.AppendNode(word('J', c.Y))
