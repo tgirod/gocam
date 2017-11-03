@@ -30,6 +30,13 @@ func (v Vector) Diff(o Vector) Vector {
 		Y: v.Y - o.Y}
 }
 
+// Neg returns the negative of vector v
+func (v Vector) Neg() Vector {
+	return Vector{
+		X: -v.X,
+		Y: -v.Y}
+}
+
 // Length returns the norm of v
 func (v Vector) Length() float64 {
 	return math.Sqrt(v.X*v.X + v.Y*v.Y)
@@ -64,11 +71,4 @@ func (v Vector) Angle() float64 {
 		angle += math.Pi * 2
 	}
 	return angle
-}
-
-// Neg returns the negative of vector v
-func (v Vector) Neg() Vector {
-	return Vector{
-		X: -v.X,
-		Y: -v.Y}
 }
