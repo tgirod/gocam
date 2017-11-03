@@ -37,10 +37,9 @@ func (v Vector) Length() float64 {
 
 // Normal returns the normal vector of v
 func (v Vector) Normal() Vector {
-	// FIXME je voudrais un normal qui pointe toujours vers la droite ...
 	return Vector{
-		X: v.X,
-		Y: -v.Y}
+		X: v.Y,
+		Y: -v.X}
 }
 
 // Unit returns vector v divided by v.Norm()
