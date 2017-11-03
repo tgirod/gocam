@@ -35,6 +35,14 @@ func (v Vector) Length() float64 {
 	return math.Sqrt(v.X*v.X + v.Y*v.Y)
 }
 
+// Normal returns the normal vector of v
+func (v Vector) Normal() Vector {
+	// FIXME je voudrais un normal qui pointe toujours vers la droite ...
+	return Vector{
+		X: v.X,
+		Y: -v.Y}
+}
+
 // Unit returns vector v divided by v.Norm()
 func (v Vector) Unit() Vector {
 	n := v.Length()
