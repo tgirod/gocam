@@ -48,7 +48,7 @@ func ArcToBulge(center Vector, radius float64, startAngle float64, endAngle floa
 // BulgeToArc converts line+bulge arc representation to dxf representation.
 func BulgeToArc(p1 Vector, p2 Vector, bulge float64) (Vector, float64, float64, float64) {
 	theta2 := 2 * math.Atan(bulge)                // half of included angle
-	d := p2.Diff(p1).Norm() / 2                   // half of the chord length
+	d := p2.Diff(p1).Length() / 2                 // half of the chord length
 	r := d / math.Sin(theta2)                     // radius
 	a := p2.Diff(p1).Angle()                      // angle of the chord
 	c := Cartesian(math.Pi/2-theta2+a, r).Sum(p1) // center

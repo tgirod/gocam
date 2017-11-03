@@ -30,14 +30,14 @@ func (v Vector) Diff(o Vector) Vector {
 		Y: v.Y - o.Y}
 }
 
-// Norm returns the norm of v
-func (v Vector) Norm() float64 {
+// Length returns the norm of v
+func (v Vector) Length() float64 {
 	return math.Sqrt(v.X*v.X + v.Y*v.Y)
 }
 
 // Unit returns vector v divided by v.Norm()
 func (v Vector) Unit() Vector {
-	n := v.Norm()
+	n := v.Length()
 	return Vector{
 		X: v.X / n,
 		Y: v.Y / n}
@@ -47,7 +47,7 @@ func (v Vector) Unit() Vector {
 // equal. Returns true if the distance between the two vectors is below
 // tolerance, otherwise false
 func (v Vector) Equals(o Vector) bool {
-	return v.Diff(o).Norm() < tolerance
+	return v.Diff(o).Length() < tolerance
 }
 
 // Angle returns the angle (in radians) formed by the vector v
