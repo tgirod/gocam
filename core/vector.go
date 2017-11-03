@@ -65,3 +65,10 @@ func (v Vector) Angle() float64 {
 	}
 	return angle
 }
+
+// Neg returns the negative of vector v
+func (v Vector) Neg() Vector {
+	return Vector{
+		X: -v.X,
+		Y: -v.Y}
+}

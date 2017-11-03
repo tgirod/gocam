@@ -29,20 +29,36 @@ func (l *Line) String() string {
 
 // TanStart returns the tangent vector at the starting point of the line
 func (l *Line) TanStart() Vector {
-	// simple case of the straight line
+	var tan Vector
 	if l.Bulge == 0 {
-		return l.End.Diff(l.Start).Unit()
+		// straight line
+		tan = l.End.Diff(l.Start).Unit()
+	} else if l.Bulge > 0 {
+		// CCW arc
+		c, _, _, _ := BulgeToArc(l.Start, l.End, l.Bulge)
+		tan = l.Start.Diff(c).Normal().Unit().Neg()
+	} else {
+		// CW arc
+		c, _, _, _ := BulgeToArc(l.Start, l.End, l.Bulge)
+		tan = l.Start.Diff(c).Normal().Unit()
 	}
-	// FIXME arc
-	return Vector{}
+	return tan
 }
 
 // TanEnd returns the tangent vector at the ending point of the line
 func (l *Line) TanEnd() Vector {
-	// simple case of the straight line
+	var tan Vector
 	if l.Bulge == 0 {
-		return l.End.Diff(l.Start).Unit()
+		// straight line
+		tan = l.End.Diff(l.Start).Unit()
+	} else if l.Bulge > 0 {
+		// CCW arc
+		c, _, _, _ := BulgeToArc(l.Start, l.End, l.Bulge)
+		tan = l.End.Diff(c).Normal().Unit().Neg()
+	} else {
+		// CW arc
+		c, _, _, _ := BulgeToArc(l.Start, l.End, l.Bulge)
+		tan = l.End.Diff(c).Normal().Unit()
 	}
-	// FIXME arc
-	return Vector{}
+	return tan
 }
