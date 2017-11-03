@@ -18,6 +18,11 @@ func (l *Line) Reverse() {
 	l.Bulge = -l.Bulge
 }
 
+// Vector returns the vector from Start to End
+func (l *Line) Vector() Vector {
+	return l.End.Diff(l.Start)
+}
+
 func (l *Line) String() string {
 	return fmt.Sprintf("Line: %v, %v, %.2f", l.Start, l.End, l.Bulge)
 }
