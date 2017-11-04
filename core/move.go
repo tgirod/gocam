@@ -20,7 +20,7 @@ func (l *Line) Reverse() {
 
 // Vector returns the vector from Start to End
 func (l *Line) Vector() Vector {
-	return l.End.Diff(l.Start)
+	return l.End.Sub(l.Start)
 }
 
 func (l *Line) String() string {
@@ -32,15 +32,15 @@ func (l *Line) TanStart() Vector {
 	var tan Vector
 	if l.Bulge == 0 {
 		// straight line
-		tan = l.End.Diff(l.Start).Unit()
+		tan = l.Vector().Unit()
 	} else if l.Bulge > 0 {
 		// CCW arc
 		c, _, _, _ := BulgeToArc(l.Start, l.End, l.Bulge)
-		tan = l.Start.Diff(c).Normal().Unit().Neg()
+		tan = l.Start.Sub(c).Normal().Unit().Neg()
 	} else {
 		// CW arc
 		c, _, _, _ := BulgeToArc(l.Start, l.End, l.Bulge)
-		tan = l.Start.Diff(c).Normal().Unit()
+		tan = l.Start.Sub(c).Normal().Unit()
 	}
 	return tan
 }
@@ -50,15 +50,15 @@ func (l *Line) TanEnd() Vector {
 	var tan Vector
 	if l.Bulge == 0 {
 		// straight line
-		tan = l.End.Diff(l.Start).Unit()
+		tan = l.Vector().Unit()
 	} else if l.Bulge > 0 {
 		// CCW arc
 		c, _, _, _ := BulgeToArc(l.Start, l.End, l.Bulge)
-		tan = l.End.Diff(c).Normal().Unit().Neg()
+		tan = l.End.Sub(c).Normal().Unit().Neg()
 	} else {
 		// CW arc
 		c, _, _, _ := BulgeToArc(l.Start, l.End, l.Bulge)
-		tan = l.End.Diff(c).Normal().Unit()
+		tan = l.End.Sub(c).Normal().Unit()
 	}
 	return tan
 }

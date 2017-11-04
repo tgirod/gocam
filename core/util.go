@@ -37,8 +37,8 @@ func Polar(p Vector) (float64, float64) {
 // Bulge < 0: CW arc
 // Bulge == 1: semi-circle
 func ArcToBulge(center Vector, radius float64, startAngle float64, endAngle float64) (Vector, Vector, float64) {
-	startPoint := Cartesian(startAngle, radius).Sum(center)
-	endPoint := Cartesian(endAngle, radius).Sum(center)
+	startPoint := Cartesian(startAngle, radius).Add(center)
+	endPoint := Cartesian(endAngle, radius).Add(center)
 	// bulge conversion
 	theta := endAngle - startAngle
 	bulge := math.Tan(theta / 4)
@@ -48,12 +48,12 @@ func ArcToBulge(center Vector, radius float64, startAngle float64, endAngle floa
 // BulgeToArc converts line+bulge arc representation to dxf representation.
 func BulgeToArc(p1 Vector, p2 Vector, bulge float64) (Vector, float64, float64, float64) {
 	theta2 := 2 * math.Atan(bulge)                // half of included angle
-	d := p2.Diff(p1).Length() / 2                 // half of the chord length
+	d := p2.Sub(p1).Length() / 2                  // half of the chord length
 	r := d / math.Sin(theta2)                     // radius
-	a := p2.Diff(p1).Angle()                      // angle of the chord
-	c := Cartesian(math.Pi/2-theta2+a, r).Sum(p1) // center
+	a := p2.Sub(p1).Angle()                       // angle of the chord
+	c := Cartesian(math.Pi/2-theta2+a, r).Add(p1) // center
 	if bulge < 0 {
-		return c, p2.Diff(c).Angle(), p1.Diff(c).Angle(), math.Abs(r)
+		return c, p2.Sub(c).Angle(), p1.Sub(c).Angle(), math.Abs(r)
 	}
-	return c, p1.Diff(c).Angle(), p2.Diff(c).Angle(), math.Abs(r)
+	return c, p1.Sub(c).Angle(), p2.Sub(c).Angle(), math.Abs(r)
 }

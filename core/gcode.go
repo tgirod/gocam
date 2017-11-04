@@ -64,7 +64,7 @@ func (p *Path) Gcode() []gcode.Block {
 			// center (absolute)
 			c, _, _, _ := BulgeToArc(l.Start, l.End, l.Bulge)
 			// center (relative to the start)
-			c = c.Diff(l.Start)
+			c = c.Sub(l.Start)
 
 			b.AppendNode(word('I', c.X))
 			b.AppendNode(word('J', c.Y))
