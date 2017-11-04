@@ -97,9 +97,9 @@ func (p *Path) StartNear(v Vector) {
 	if p.Len() > 0 && p.IsClosed() {
 		// find the closest vertex
 		index := 0
-		closest := v.Diff(p.Lines[0].Start).Length()
+		closest := v.Sub(p.Lines[0].Start).Length()
 		for i := 1; i < p.Len(); i++ {
-			current := v.Diff(p.Lines[i].Start).Length()
+			current := v.Sub(p.Lines[i].Start).Length()
 			if current < closest {
 				index = i
 				closest = current

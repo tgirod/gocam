@@ -16,18 +16,32 @@ func (v Vector) String() string {
 	return fmt.Sprintf("(%.2f, %.2f)", v.X, v.Y)
 }
 
-// Sum returns the addition v + o
-func (v Vector) Sum(o Vector) Vector {
+// Add returns the addition v + o
+func (v Vector) Add(o Vector) Vector {
 	return Vector{
 		X: v.X + o.X,
 		Y: v.Y + o.Y}
 }
 
-// Diff returns the difference v - o
-func (v Vector) Diff(o Vector) Vector {
+// Sub returns the difference v - o
+func (v Vector) Sub(o Vector) Vector {
 	return Vector{
 		X: v.X - o.X,
 		Y: v.Y - o.Y}
+}
+
+// Mult multiplies the vector by scalar s
+func (v Vector) Mul(s float64) Vector {
+	return Vector{
+		X: v.X * s,
+		Y: v.Y * s}
+}
+
+// Div divides the vector by scalar s
+func (v Vector) Div(s float64) Vector {
+	return Vector{
+		X: v.X / s,
+		Y: v.Y / s}
 }
 
 // Neg returns the negative of vector v
@@ -52,16 +66,14 @@ func (v Vector) Normal() Vector {
 // Unit returns vector v divided by v.Norm()
 func (v Vector) Unit() Vector {
 	n := v.Length()
-	return Vector{
-		X: v.X / n,
-		Y: v.Y / n}
+	return v.Div(n)
 }
 
 // Equals tests if vectors v and o are sufficiently close to be considered
 // equal. Returns true if the distance between the two vectors is below
 // tolerance, otherwise false
 func (v Vector) Equals(o Vector) bool {
-	return v.Diff(o).Length() < tolerance
+	return v.Sub(o).Length() < tolerance
 }
 
 // Angle returns the angle (in radians) formed by the vector v
