@@ -20,7 +20,7 @@ func (p *Path) String() string {
 	s := make([]string, p.Len()+1)
 	s[0] = fmt.Sprintf("Path %s:", p.Name)
 	for i, l := range p.Lines {
-		s[i+1] = fmt.Sprintf("\t%s", l)
+		s[i+1] = fmt.Sprintf("\t%v", l)
 	}
 	return strings.Join(s, "\n")
 }
