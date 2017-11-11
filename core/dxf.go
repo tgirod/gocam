@@ -56,7 +56,7 @@ func NewLine(e *entities.Line) *Path {
 	start := NewVector(e.Start)
 	end := NewVector(e.End)
 	path := NewPath(e.Handle)
-	path.Append(Line{start, end, 0})
+	path.Append(&Line{start, end, 0})
 	return path
 }
 
@@ -67,7 +67,7 @@ func NewPolyline(e *entities.Polyline) *Path {
 	start := NewVector(e.Vertices[0].Location)
 	for _, v := range e.Vertices[1:] {
 		end := NewVector(v.Location)
-		path.Append(Line{start, end, 0})
+		path.Append(&Line{start, end, 0})
 		start = end
 	}
 	return path
@@ -81,7 +81,7 @@ func NewLWPolyline(e *entities.LWPolyline) *Path {
 	for _, p := range e.Points[1:] {
 		end := NewVector(p.Point)
 		bulge := p.Bulge
-		path.Append(Line{start, end, bulge})
+		path.Append(&Line{start, end, bulge})
 		start = end
 	}
 	return path
@@ -100,6 +100,6 @@ func NewArc(e *entities.Arc) *Path {
 	startPoint, endPoint, bulge := ArcToBulge(center, radius, startAngle, endAngle)
 
 	path := NewPath(e.Handle)
-	path.Append(Line{startPoint, endPoint, bulge})
+	path.Append(&Line{startPoint, endPoint, bulge})
 	return path
 }

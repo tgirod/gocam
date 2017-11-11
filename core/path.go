@@ -41,8 +41,8 @@ func (p *Path) End() Vector {
 }
 
 // Append adds a line at the end of the path
-func (p *Path) Append(l Line) {
-	p.Lines = append(p.Lines, l)
+func (p *Path) Append(l *Line) {
+	p.Lines = append(p.Lines, *l)
 }
 
 // Join appends the path q to the path p
