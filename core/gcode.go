@@ -24,6 +24,15 @@ func header(blockName string) gcode.Block {
 	return block
 }
 
+func move(x, y float64) gcode.Block {
+	m := gcode.Block{}
+	m.AppendNodes(
+		word('G', 0),
+		word('X', x),
+		word('Y', y))
+	return m
+}
+
 // Gcode generates gcode for the given path
 func (p *Path) Gcode() []gcode.Block {
 	var blocks = make([]gcode.Block, 0, p.Len()+2)
@@ -31,18 +40,17 @@ func (p *Path) Gcode() []gcode.Block {
 	// add a header (bCNC compatible, for easy visualisation)
 	blocks = append(blocks, header(p.Name))
 
-	// convert moves to gcode
-
 	// initial G0 move to the starting point
-	g0 := gcode.Block{}
-	g0.AppendNodes(
-		word('G', 0),
-		word('X', p.Start().X),
-		word('Y', p.Start().Y))
-	blocks = append(blocks, g0)
+	blocks = append(blocks, move(p.Start().X, p.Start().Y))
+	prev := p.Start() // where last move ended
 
 	// subsequent G1 moves
 	for _, l := range p.Lines {
+		// add G0 move if the line does not start where the previous one ended
+		if !l.Start.Equals(prev) {
+			blocks = append(blocks, move(l.Start.X, l.Start.Y))
+		}
+		// add actual move (G1, G2 or G3)
 		b := gcode.Block{}
 		if l.Bulge == 0 {
 			// straight line
@@ -70,6 +78,7 @@ func (p *Path) Gcode() []gcode.Block {
 			b.AppendNode(word('J', c.Y))
 		}
 		blocks = append(blocks, b)
+		prev = l.End
 	}
 	return blocks
 }
