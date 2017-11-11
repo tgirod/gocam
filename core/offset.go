@@ -31,10 +31,15 @@ func (l *Line) Offset(d float64) *Line {
 
 // Offset method for a Path. returns a new path at distance d
 func (p *Path) Offset(d float64) *Path {
-	// FIXME first draft, incomplete
-	offPath := NewPath(fmt.Sprintf("%s offset(%.2f)", p.Name, d))
+	// first, generate an offset for each line
+	offLines := NewPath(fmt.Sprintf("%s offset(%.2f)", p.Name, d))
 	for _, l := range p.Lines {
-		offPath.Append(l.Offset(d))
+		offLines.Append(l.Offset(d))
 	}
-	return offPath
+	// next manage the transitions between lines
+	// 1. if ends are already equals, leave it this way (it means the originals were tangent)
+	// 2. there are two possibilities:
+	// 	a. angle>180 degrees --> add an arc to join lines
+	//  b. angle<180 degrees --> find the intersection and modify both lines to match there
+	return offLines // FIXME
 }
