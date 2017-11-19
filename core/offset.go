@@ -1,6 +1,9 @@
 package core
 
-import "fmt"
+import (
+	"fmt"
+	"math"
+)
 
 // Offset method returns a new line at distance d of line l
 func (l *Line) Offset(d float64) *Line {
@@ -31,15 +34,37 @@ func (l *Line) Offset(d float64) *Line {
 
 // Offset method for a Path. returns a new path at distance d
 func (p *Path) Offset(d float64) *Path {
-	// first, generate an offset for each line
-	offLines := NewPath(fmt.Sprintf("%s offset(%.2f)", p.Name, d))
+	var lines []*Line
 	for _, l := range p.Lines {
-		offLines.Append(l.Offset(d))
+		lines = append(lines, l.Offset(d))
 	}
+
+	offset := NewPath(fmt.Sprintf("%s off(%f)", p.Name, d))
+
 	// next manage the transitions between lines
-	// 1. if ends are already equals, leave it this way (it means the originals were tangent)
-	// 2. there are two possibilities:
-	// 	a. angle>180 degrees --> add an arc to join lines
-	//  b. angle<180 degrees --> find the intersection and modify both lines to match there
-	return offLines // FIXME
+	for cur := 0; cur < p.Len(); cur++ {
+		next := (cur + 1) % p.Len()
+		// add the current
+		offset.Append(lines[cur])
+		// if offset lines are not connected
+		if !lines[cur].End.Equals(lines[next].Start) {
+			angle := p.Lines[next].TanStart().Angle() - p.Lines[cur].TanEnd().Angle()
+			if angle > 0 {
+				// add an arc to join lines
+				center := p.Lines[cur].End
+				radius := math.Abs(d)
+				startAngle := lines[cur].End.Sub(center).Angle()
+				endAngle := lines[next].Start.Sub(center).Angle()
+				startPoint, endPoint, bulge := ArcToBulge(center, radius, startAngle, endAngle)
+				arc := Line{
+					Start: startPoint,
+					End:   endPoint,
+					Bulge: bulge}
+				offset.Append(arc)
+			} else {
+				// cut lines to match at intersection
+			}
+		}
+	}
+	return offset
 }
