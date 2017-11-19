@@ -16,10 +16,6 @@ func main() {
 	}
 
 	if mod, err := core.ImportDXF(file); err == nil {
-		//core.Log.Println(mod)
-		for _, p := range mod.Paths {
-			core.Log.Println(p.Name, p.Bounds())
-		}
 		fmt.Println(mod.Gcode().Export(5))
 	} else {
 		log.Fatal(err)
