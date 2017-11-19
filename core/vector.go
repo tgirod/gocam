@@ -84,3 +84,8 @@ func (v Vector) Angle() float64 {
 	}
 	return angle
 }
+
+// Dot returns the dot product of vectors v and o
+func (v Vector) Dot(o Vector) float64 {
+	return v.X*o.X + v.Y*o.Y
+}
