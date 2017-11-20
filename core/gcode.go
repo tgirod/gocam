@@ -24,12 +24,12 @@ func header(blockName string) gcode.Block {
 	return block
 }
 
-func move(x, y float64) gcode.Block {
+func move(v Vector) gcode.Block {
 	m := gcode.Block{}
 	m.AppendNodes(
 		word('G', 0),
-		word('X', x),
-		word('Y', y))
+		word('X', v.X),
+		word('Y', v.Y))
 	return m
 }
 
@@ -41,44 +41,42 @@ func (p *Path) Gcode() []gcode.Block {
 	blocks = append(blocks, header(p.Name))
 
 	// initial G0 move to the starting point
-	blocks = append(blocks, move(p.Start().X, p.Start().Y))
-	prev := p.Start() // where last move ended
+	blocks = append(blocks, move(p.StartPoint()))
+	prev := p.StartPoint() // where last move ended
 
 	// subsequent G1 moves
-	for _, l := range p.Lines {
+	for _, m := range p.Moves {
 		// add G0 move if the line does not start where the previous one ended
-		if !l.Start.Equals(prev) {
-			blocks = append(blocks, move(l.Start.X, l.Start.Y))
+		if !m.StartPoint().Equals(prev) {
+			Log.Printf("Path is not continuous. Adding a G0 move from %v to %v", prev, m.StartPoint())
+			blocks = append(blocks, move(m.StartPoint()))
 		}
 		// add actual move (G1, G2 or G3)
 		b := gcode.Block{}
-		if l.Bulge == 0 {
-			// straight line
+		switch t := m.(type) {
+		default:
+			Log.Printf("Unexpected type %T", t)
+		case *Line:
 			b.AppendNodes(
 				word('G', 1),
-				word('X', l.End.X),
-				word('Y', l.End.Y))
-		} else {
-			if l.Bulge > 0 {
-				// CCW arc
-				b.AppendNode(word('G', 3))
-			} else {
-				// CW arc
+				word('X', t.End.X),
+				word('Y', t.End.Y))
+		case *Arc:
+			if t.CW {
 				b.AppendNode(word('G', 2))
+			} else {
+				b.AppendNode(word('G', 3))
 			}
 			// arc's endpoint
-			b.AppendNode(word('X', l.End.X))
-			b.AppendNode(word('Y', l.End.Y))
-			// center (absolute)
-			c, _, _, _ := BulgeToArc(l.Start, l.End, l.Bulge)
+			b.AppendNode(word('X', t.End.X))
+			b.AppendNode(word('Y', t.End.Y))
 			// center (relative to the start)
-			c = c.Sub(l.Start)
-
-			b.AppendNode(word('I', c.X))
-			b.AppendNode(word('J', c.Y))
+			center := t.Center.Sub(t.Start)
+			b.AppendNode(word('I', center.X))
+			b.AppendNode(word('J', center.Y))
 		}
 		blocks = append(blocks, b)
-		prev = l.End
+		prev = m.EndPoint()
 	}
 	return blocks
 }

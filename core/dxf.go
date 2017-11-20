@@ -41,6 +41,7 @@ func ImportDXF(stream io.Reader) (*Model, error) {
 			path = NewArc(e)
 		}
 
+		Log.Printf("joining %v", path)
 		mod.JoinPath(path)
 	}
 	return mod, nil
@@ -56,7 +57,7 @@ func NewLine(e *entities.Line) *Path {
 	start := NewVector(e.Start)
 	end := NewVector(e.End)
 	path := NewPath(e.Handle)
-	path.Append(&Line{start, end, 0})
+	path.Append(&Line{start, end})
 	return path
 }
 
@@ -67,7 +68,7 @@ func NewPolyline(e *entities.Polyline) *Path {
 	start := NewVector(e.Vertices[0].Location)
 	for _, v := range e.Vertices[1:] {
 		end := NewVector(v.Location)
-		path.Append(&Line{start, end, 0})
+		path.Append(&Line{start, end})
 		start = end
 	}
 	return path
@@ -80,15 +81,33 @@ func NewLWPolyline(e *entities.LWPolyline) *Path {
 	start := NewVector(e.Points[0].Point)
 	for _, p := range e.Points[1:] {
 		end := NewVector(p.Point)
-		bulge := p.Bulge
-		path.Append(&Line{start, end, bulge})
+		if p.Bulge == 0 {
+			path.Append(&Line{start, end})
+		} else {
+			path.Append(NewArcFromBulge(start, end, p.Bulge))
+		}
 		start = end
 	}
 	return path
 }
 
+// NewArcFromBulge builds an arc from a starting point, and ending point and a
+// bulge
+func NewArcFromBulge(start Vector, end Vector, bulge float64) *Arc {
+	chord := end.Sub(start)                               // chord of the arc
+	theta2 := 2 * math.Atan(bulge)                        // half of included angle
+	d := chord.Length() / 2                               // half of the chord length
+	r := d / math.Sin(theta2)                             // radius
+	a := end.Sub(start).Angle()                           // angle of the chord
+	center := Cartesian(math.Pi/2-theta2+a, r).Add(start) // center
+	cw := bulge < 0
+	return &Arc{start, end, center, cw}
+}
+
 // NewArc converts a Arc entity to a path. The arc is converted to line+bulge format
 func NewArc(e *entities.Arc) *Path {
+	path := NewPath(e.Handle)
+
 	center := NewVector(e.Center)
 	startAngle := Radians(e.StartAngle)
 	endAngle := Radians(e.EndAngle)
@@ -96,10 +115,9 @@ func NewArc(e *entities.Arc) *Path {
 		endAngle += math.Pi * 2
 	}
 	radius := e.Radius
+	startPoint := Cartesian(startAngle, radius).Add(center)
+	endPoint := Cartesian(endAngle, radius).Add(center)
 
-	startPoint, endPoint, bulge := ArcToBulge(center, radius, startAngle, endAngle)
-
-	path := NewPath(e.Handle)
-	path.Append(&Line{startPoint, endPoint, bulge})
+	path.Append(&Arc{startPoint, endPoint, center, false})
 	return path
 }

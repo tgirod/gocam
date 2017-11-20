@@ -52,12 +52,12 @@ func (mod *Model) JoinPath(path *Path) {
 
 		for i := 0; i < mod.Len() && (pre == -1 || post == -1); i++ {
 			cur := &mod.Paths[i]
-			if !cur.IsClosed() && cur.End().Equals(path.Start()) {
+			if !cur.IsClosed() && cur.EndPoint().Equals(path.StartPoint()) {
 				// found prepending path
 				Log.Printf("\tfound prepending path: %s\n", cur.Name)
 				pre = i
 			}
-			if !cur.IsClosed() && path.End().Equals(cur.Start()) {
+			if !cur.IsClosed() && path.EndPoint().Equals(cur.StartPoint()) {
 				// found appending path
 				Log.Printf("\tfound appending path: %s\n", cur.Name)
 				post = i
