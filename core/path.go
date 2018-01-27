@@ -114,10 +114,10 @@ func (p *Path) StartFrom(v Vector) {
 		index := 0
 		closest := v.Sub(p.Moves[0].StartPoint()).Length()
 		for i := 1; i < p.Len(); i++ {
-			current := v.Sub(p.Moves[i].StartPoint()).Length()
-			if current < closest {
+			dist := v.Sub(p.Moves[i].StartPoint()).Length()
+			if dist < closest {
 				index = i
-				closest = current
+				closest = dist
 			}
 		}
 		// rotate
