@@ -11,6 +11,52 @@ Pour plus tard :
 - [ ] Overcut (mouvement spécial)
 - [ ] Algo offset avec les îles (but premier de ce programme)
 
+# 2018.02.02
+
+Reprenons l'algo d'import DXF
+
+## convertir les entités DXF vers la représentation interne
+
+Importer d'abord les entités qui définissent directement leurs extrémités (pas
+les arcs). Ajouter les sommets dans un dictionnaire. Importer ensuite les arcs,
+qui nécessitent un calcul trigo pour en connaitre les extrémités. 
+
+Pour chaque sommet, on vérifie si il existe déjà un sommet suffisament proche
+dans le dictionnaire. Si oui, on utilise le sommet existant à la place du
+sommet calculé. 
+
+## combiner les entités pour former des chemins
+
+Les entités converties forment une file `queue []Mover`. Il faut maintenant
+les assembler pour former des chemins. On définit un dictionnaire de type
+`paths map[Vector]Mover`, dans lequel on associe un `Mover` aux coordonnées de son
+point de départ. Puis, on traite la file jusqu'à ce qu'elle soit vide de la
+manière suivante :
+
+- extraire le premier `m Mover` de la file,
+- si `m.EndPoint()` existe dans `paths`, on retire le chemin correspondant, on
+  lui ajoute m, et on remet le chemin résultant dans la file.
+- si `m.StartPoint()` existe dans `paths`, on fait pareil mais en retournant m
+  d'abord.
+- sinon, on ajoute m dans paths
+
+Quand la file est vide, tous les assemblages possibles ont été faits. Mais
+selon l'ordre dans lequel les Mover ont été ajoutés, certains chemins peuvent
+être ouverts mais contenir des boucles. Pour remédier à ce problème, on prend
+chaque chemin et on vérifie si le même sommet apparait plusieurs fois. Si c'est
+le cas, on sépare le chemin de manière à isoler la boucle.
+
+Pour finir, on fait en sorte que tous les chemins (fermés) tournent dans le
+sens anti-horaire.
+
+Note : il faudrait faire ça en séparant les layers.
+
+## méthode de test
+
+On pourrait prendre un DXF relativement complexe, et randomiser les entités
+avant l'import. Si l'algo fonctionne, on devrait avoir le même résultat quelque
+soit l'ordre dans lequel les entités sont ajoutées.
+
 # 2018.01.30
 
 Pour construire des chemins à partir des entités DXF, on a besoin de savoir si
