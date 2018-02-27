@@ -1,11 +1,9 @@
-package core
+package model
 
 import (
 	"fmt"
 	"math"
 )
-
-const tolerance = 10E-5
 
 // Vector represents a 2D vector
 type Vector struct {
@@ -13,7 +11,7 @@ type Vector struct {
 }
 
 func (v Vector) String() string {
-	return fmt.Sprintf("(%.2f, %.2f)", v.X, v.Y)
+	return fmt.Sprintf("X%.2fY%.2f", v.X, v.Y)
 }
 
 // Add returns the addition v + o
@@ -56,6 +54,10 @@ func (v Vector) Length() float64 {
 	return math.Sqrt(v.X*v.X + v.Y*v.Y)
 }
 
+func (v Vector) Distance(w Vector) float64 {
+	return v.Sub(w).Length()
+}
+
 // Normal returns the normal vector of v
 func (v Vector) Normal() Vector {
 	return Vector{
@@ -67,13 +69,6 @@ func (v Vector) Normal() Vector {
 func (v Vector) Unit() Vector {
 	n := v.Length()
 	return v.Div(n)
-}
-
-// Equals tests if vectors v and o are sufficiently close to be considered
-// equal. Returns true if the distance between the two vectors is below
-// tolerance, otherwise false
-func (v Vector) Equals(o Vector) bool {
-	return v.Sub(o).Length() < tolerance
 }
 
 // Angle returns the angle (in radians) formed by the vector v

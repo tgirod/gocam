@@ -1,4 +1,4 @@
-package core
+package model
 
 import (
 	"math"
@@ -6,62 +6,47 @@ import (
 )
 
 var (
-	a         = Vector{1, 1}
-	b         = Vector{2, 2}
-	f float64 = 2
+	v1, v2, v3 Vector = Vector{1, 1}, Vector{2, 2}, Vector{3, 3}
 )
 
 func TestAdd(t *testing.T) {
 	v := Vector{3, 3}
-	if a.Add(b) != v {
+	if v1.Add(v2) != v {
 		t.Error("Add failed")
 	}
 }
 
 func TestSub(t *testing.T) {
 	v := Vector{-1, -1}
-	if a.Sub(b) != v {
+	if v1.Sub(v2) != v {
 		t.Error("Sub failed")
 	}
 }
 
 func TestMul(t *testing.T) {
 	v := Vector{2, 2}
-	if a.Mul(f) != v {
+	if v1.Mul(2.) != v {
 		t.Error("Mul failed")
 	}
 }
 
 func TestDiv(t *testing.T) {
 	v := Vector{0.5, 0.5}
-	if a.Div(f) != v {
+	if v1.Div(2) != v {
 		t.Error("Mul failed")
 	}
 }
 
 func TestNeg(t *testing.T) {
 	v := Vector{-1, -1}
-	if a.Neg() != v {
+	if v1.Neg() != v {
 		t.Error("Neg failed")
 	}
 }
 
 func TestLength(t *testing.T) {
 	res := math.Sqrt(2)
-	if a.Length() != res {
+	if v1.Length() != res {
 		t.Error("Neg failed")
-	}
-}
-
-func TestUnit(t *testing.T) {
-	l := b.Unit().Length()
-	if math.Abs(l-1) > tolerance {
-		t.Error("Unit failed")
-	}
-}
-
-func TestNormal(t *testing.T) {
-	if !a.Normal().Equals(Vector{1, -1}) {
-		t.Error("Normal failed")
 	}
 }
