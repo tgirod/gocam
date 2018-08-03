@@ -94,6 +94,24 @@ func TestIsCounterClockwise(t *testing.T) {
 	assert.Equal(t, true, ok, "Path.IsClockwise failed to detect CW path")
 }
 
+func TestFlatten(t *testing.T) {
+	p1 := path(a, b)
+	p2 := path(b, c, d)
+	path := Path{}
+	if ok := path.Append(&p1); !ok {
+		t.Fatal("should be ok")
+	}
+	if ok := path.Append(&p2); !ok {
+		t.Fatal("should be ok")
+	}
+
+	path.Flatten()
+	pts := path.Points()
+	expPts := []v.Vector{a, b, c, d}
+
+	assert.Equal(t, expPts, pts, "Path.Flatten failed")
+}
+
 // func TestHasInnerLoop(t *testing.T) {
 // 	var data = []struct {
 // 		in        *Path
