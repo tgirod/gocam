@@ -13,7 +13,7 @@ type Line struct {
 }
 
 // Move returns the start and end points of the line
-func (l *Line) Move() (v.Vector, v.Vector) {
+func (l Line) Move() (v.Vector, v.Vector) {
 	return l.From, l.To
 }
 
@@ -22,13 +22,14 @@ func (l *Line) Reverse() {
 	l.From, l.To = l.To, l.From
 }
 
-// Adjust replaces the start and end points of the line
-func (l *Line) Adjust(from, to v.Vector) {
-	l.From = from
-	l.To = to
+func (l Line) Equal(m Move) bool {
+	if m, ok := m.(*Line); ok {
+		return l.From == m.From && l.To == m.To
+	}
+	return false
 }
 
-func (l *Line) String() string {
+func (l Line) String() string {
 	return fmt.Sprintf("%s -> %s", l.From, l.To)
 }
 
@@ -51,10 +52,14 @@ func (a *Arc) Reverse() {
 	a.CW = !a.CW
 }
 
-// Adjust replaces the start and end points of the arc
-func (a *Arc) Adjust(from, to v.Vector) {
-	a.From = from
-	a.To = to
+func (a Arc) Equal(m Move) bool {
+	if m, ok := m.(*Arc); ok {
+		return a.From == m.From &&
+			a.To == m.To &&
+			a.Center == m.Center &&
+			a.CW == m.CW
+	}
+	return false
 }
 
 func (a *Arc) String() string {

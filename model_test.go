@@ -15,16 +15,10 @@ func TestLineReverse(t *testing.T) {
 	assert.Equal(t, a, b, "Line.Reverse failed")
 }
 
-func TestLineAdjust(t *testing.T) {
-	l := Line{
-		From: v.Vector{1, 1, 0},
-		To:   v.Vector{2, 2, 0},
-	}
-	z := v.Vector{0, 0, 0}
-	l.Adjust(z, z)
-	from, to := l.Move()
-	assert.Equal(t, from, z, "Line.Adjust failed")
-	assert.Equal(t, to, z, "Line.Adjust failed")
+func TestLineEqual(t *testing.T) {
+	l1 := &Line{v.Vector{0, 0, 0}, v.Vector{1, 1, 1}}
+	l2 := &Line{v.Vector{0, 0, 0}, v.Vector{1, 1, 1}}
+	assert.Equal(t, true, l1.Equal(l2), "should be equal")
 }
 
 func TestArcReverse(t *testing.T) {
@@ -34,17 +28,8 @@ func TestArcReverse(t *testing.T) {
 	assert.Equal(t, a, b, "Arc.Reverse failed")
 }
 
-func TestArcAdjust(t *testing.T) {
-	a := Arc{
-		From:   v.Vector{1, 0, 0},
-		To:     v.Vector{-1, 0, 0},
-		Center: v.Vector{0, 0, 0},
-		CW:     false,
-	}
-
-	z := v.Vector{0, 0, 0}
-	a.Adjust(z, z)
-	from, to := a.Move()
-	assert.Equal(t, from, z, "Arc.Adjust failed")
-	assert.Equal(t, to, z, "Arc.Adjust failed")
+func TestArcEqual(t *testing.T) {
+	a1 := &Arc{v.Vector{-1, 0, 0}, v.Vector{1, 0, 0}, v.Vector{0, 0, 0}, false}
+	a2 := &Arc{v.Vector{-1, 0, 0}, v.Vector{1, 0, 0}, v.Vector{0, 0, 0}, false}
+	assert.Equal(t, true, a1.Equal(a2), "should be equal")
 }

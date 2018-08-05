@@ -1,70 +1,67 @@
 package main
 
-import v "github.com/joushou/gocnc/vector"
+import (
+	v "github.com/joushou/gocnc/vector"
+)
 
 // Path is a sequence of connected moves (Moves[i].To == Moves[i+1].From)
-type Path struct {
-	Moves []Move
-}
+type Path []Move
 
 // Move represents anything that moves from point A to point B and can be reversed
 type Move interface {
 	Move() (v.Vector, v.Vector)
-	Adjust(v.Vector, v.Vector)
 	Reverse()
-}
-
-// Len returns the number of moves composing the path
-func (p *Path) Len() int {
-	return len(p.Moves)
+	Equal(Move) bool
 }
 
 // Move returns the start and end points of the path
-func (p *Path) Move() (v.Vector, v.Vector) {
-	if p.Len() == 0 {
+func (p Path) Move() (v.Vector, v.Vector) {
+	if len(p) == 0 {
 		return v.Vector{}, v.Vector{}
 	} else {
-		from, _ := p.Moves[0].Move()
-		_, to := p.Moves[p.Len()-1].Move()
+		from, _ := p[0].Move()
+		_, to := p[len(p)-1].Move()
 		return from, to
 	}
 }
 
-func (p *Path) Adjust(from, to v.Vector) {
-	if p.Len() == 0 {
-		return
-	}
-	// adjust the starting point
-	first := p.Moves[0]
-	_, toFirst := first.Move()
-	first.Adjust(from, toFirst)
-	// adjust the ending point
-	last := p.Moves[p.Len()-1]
-	fromLast, _ := last.Move()
-	last.Adjust(fromLast, to)
-}
-
 // Reverse reverses path p, and all its composing moves
-func (p *Path) Reverse() {
+func (p Path) Reverse() {
 	i := 0
-	j := p.Len() - 1
+	j := len(p) - 1
 
 	for i <= j {
 		if i == j {
-			p.Moves[i].Reverse()
+			p[i].Reverse()
 		} else {
-			p.Moves[i].Reverse()
-			p.Moves[j].Reverse()
-			p.Moves[i], p.Moves[j] = p.Moves[j], p.Moves[i]
+			p[i].Reverse()
+			p[j].Reverse()
+			p[i], p[j] = p[j], p[i]
 		}
 		i++
 		j--
 	}
 }
 
-func (p *Path) Points() []v.Vector {
-	pts := []v.Vector{}
-	for i, m := range p.Moves {
+func (p Path) Equal(m Move) bool {
+	if m, ok := m.(Path); ok {
+		if len(p) != len(m) {
+			return false
+		}
+
+		for i := range p {
+			if !p[i].Equal(m[i]) {
+				return false
+			}
+		}
+	}
+
+	return true
+}
+
+func (p Path) Points() []v.Vector {
+	pts := make([]v.Vector, 0, len(p)+1)
+	for i, m := range p {
 		from, to := m.Move()
 		if i == 0 {
 			pts = append(pts, from)
@@ -76,59 +73,38 @@ func (p *Path) Points() []v.Vector {
 
 const EPSILON float64 = 0.001
 
-// Append attempts to add a move at the end of the path. It will work if:
-// * the path is empty
-// * m.From == p.To
-// * the distance between the two points is sufficiently small
-// in those cases the move will be added and true is returned
-// otherwise the path isn't changed and false is returned
 func (p *Path) Append(m Move) bool {
+	// utility function
+	app := func() {
+		if mPath, ok := m.(Path); ok {
+			*p = append(*p, mPath...)
+		} else {
+			*p = append(*p, m)
+		}
+	}
+
 	// empty path, always append
-	if p.Len() == 0 {
-		p.Moves = append(p.Moves, m)
+	if len(*p) == 0 {
+		app()
 		return true
 	}
+
 	_, pTo := p.Move()
-	mFrom, mTo := m.Move()
+	mFrom, _ := m.Move()
 	// exact match, append
 	if pTo == mFrom {
-		p.Moves = append(p.Moves, m)
+		app()
 		return true
 	}
+
 	// approximate match, append
 	dist := pTo.Diff(mFrom).Norm()
 	if dist < EPSILON {
-		// adjust m.From to have an exact match
-		m.Adjust(pTo, mTo)
-		p.Moves = append(p.Moves, m)
+		app()
 		return true
 	}
-	// doesn't match, return false
-	return false
-}
 
-// Join attempts to concatenate two paths
-func (p *Path) Join(p2 *Path) bool {
-	// empty path, always append
-	if p.Len() == 0 {
-		p.Moves = append(p.Moves, p2.Moves...)
-		return true
-	}
-	_, pTo := p.Move()
-	p2From, p2To := p2.Move()
-	// exact match, append
-	if pTo == p2From {
-		p.Moves = append(p.Moves, p2.Moves...)
-		return true
-	}
-	// approximate match, append
-	dist := pTo.Diff(p2From).Norm()
-	if dist < EPSILON {
-		p2.Adjust(pTo, p2To)
-		p.Moves = append(p.Moves, p2.Moves...)
-		return true
-	}
-	// doesn't match, return false
+	// no match, discard and return false
 	return false
 }
 
@@ -140,28 +116,12 @@ func (p *Path) IsClosed() bool {
 
 // IsClockwise returns true if the path is running clockwise, false otherwise.
 // The shoelace algorithm is used to determine the direction of rotation
-func (p *Path) IsClockwise() bool {
+func (p Path) IsClockwise() bool {
 	sum := 0.0
-	for _, m := range p.Moves {
+	for _, m := range p {
 		from, to := m.Move()
 		sum += (to.X - from.X) * (to.Y + from.Y)
 	}
 	// the curve is CW if the sum is positive, CCW if the sum is negative
 	return sum > 0
-}
-
-func (p *Path) Flatten() {
-	flat := Path{}
-	for _, m := range p.Moves {
-		if m, ok := m.(*Path); ok {
-			m.Flatten() // recursively flatten
-			if ok := flat.Join(m); !ok {
-				panic("this should not happen")
-			}
-		} else {
-			if ok := flat.Append(m); !ok {
-				panic("this should not happen")
-			}
-		}
-	}
 }

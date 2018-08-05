@@ -7,73 +7,85 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var a, b, c, d = v.Vector{-1, -1, 0}, v.Vector{1, -1, 0}, v.Vector{1, 1, 0}, v.Vector{-1, 1, 0}
-var c2 = v.Vector{1, 1 + EPSILON/2, 0}
+var a, b, c, d = v.Vector{0, 0, 0}, v.Vector{1, 0, 0}, v.Vector{2, 0, 0}, v.Vector{3, 0, 0}
+var e = v.Vector{1, 1, 0}
+var ab, bc, cd = &Line{a, b}, &Line{b, c}, &Line{c, d}
+var ba, cb, dc = &Line{b, a}, &Line{c, b}, &Line{d, c}
+var c2 = c.Sum(v.Vector{EPSILON / 2, 0, 0})
 
-var p Path = Path{}
-
-func path(points ...v.Vector) Path {
+func path(points ...v.Vector) *Path {
 	p := Path{}
 	for i := 0; i < len(points)-1; i++ {
 		from := points[i]
 		to := points[i+1]
 		line := &Line{from, to}
-		p.Append(line)
+		p = append(p, line)
 	}
-	return p
+	return &p
 }
 
 func TestLen0(t *testing.T) {
-	assert.Equal(t, p.Len(), 0, "length of empty path is not zero")
+	p := Path{}
+	assert.Equal(t, 0, len(p), "length of empty path is not zero")
+}
+
+func TestEqual(t *testing.T) {
+	p1 := path(a, b, c, d)
+	p2 := path(a, b, c, d)
+	assert.Equal(t, true, p1.Equal(p2), "should be equal")
+}
+
+func TestPoints(t *testing.T) {
+	p := Path{
+		ab,
+		bc,
+	}
+	pts := []v.Vector{a, b, c}
+	assert.Equal(t, pts, p.Points(), "Path.Points failed")
 }
 
 func TestAppendEmpty(t *testing.T) {
-	l := &Line{a, b}
-	ok := p.Append(l)
-
-	assert.Equal(t, ok, true, "cannot append move to empty path")
+	p := &Path{}
+	ok := p.Append(ab)
+	assert.Equal(t, ok, true, "Path.Append failed to append to an empty path")
+	assert.Equal(t, &Path{ab}, p, "Path.Append didn't append the right thing")
 }
 
 func TestAppendExact(t *testing.T) {
-	l := &Line{b, c}
-	ok := p.Append(l)
-
+	p := &Path{ab}
+	ok := p.Append(bc)
 	assert.Equal(t, ok, true, "cannot append move with shared end")
 }
 
 func TestAppendApproximate(t *testing.T) {
-	l := &Line{c2, d}
-	ok := p.Append(l)
-
-	assert.Equal(t, ok, true, "cannot append move with approximate end")
-	lAdjusted := p.Moves[p.Len()-1]
-	from, _ := lAdjusted.Move()
-	assert.Equal(t, from, c, "From was not adjusted")
+	p := &Path{bc}
+	ok := p.Append(&Line{c2, d})
+	assert.Equal(t, true, ok, "cannot append move with approximate end")
 }
 
-func TestPoints(t *testing.T) {
-	pts := p.Points()
-	exp := []v.Vector{a, b, c, d}
-
-	assert.Equal(t, exp, pts, "unexpected points")
+func TestAppendFail(t *testing.T) {
+	p := &Path{ab}
+	ok := p.Append(cd)
+	assert.Equal(t, false, ok, "should not append")
+	assert.Equal(t, &Path{ab}, p, "should be ab")
 }
 
-func TestReverseOdd(t *testing.T) {
-	p := path(a, b, c)
+func TestReverseEmpty(t *testing.T) {
+	p := &Path{}
 	p.Reverse()
-	revPts := p.Points()
-	expPts := []v.Vector{c, b, a}
-
-	assert.Equal(t, expPts, revPts, "Path.Reverse failed")
+	assert.Equal(t, true, p.Equal(&Path{}), "empty reverse")
 }
 
 func TestReverseEven(t *testing.T) {
-	p := path(a, b)
+	p := path(a, b, c)
 	p.Reverse()
-	revPts := p.Points()
-	expPts := []v.Vector{b, a}
+	assert.Equal(t, path(c, b, a), p, "Path.Reverse failed")
+}
 
-	assert.Equal(t, expPts, revPts, "Path.Reverse failed")
+func TestReverseOdd(t *testing.T) {
+	p := path(a, b, c, d)
+	p.Reverse()
+	assert.Equal(t, path(d, c, b, a), p, "Path.Reverse failed")
 }
 
 func TestIsClosed(t *testing.T) {
@@ -83,33 +95,15 @@ func TestIsClosed(t *testing.T) {
 }
 
 func TestIsClockwise(t *testing.T) {
-	p := path(a, b, c, a)
+	p := path(a, b, e, a)
 	ok := p.IsClockwise()
 	assert.Equal(t, false, ok, "Path.IsClockwise failed to detect CCW path")
 }
 
 func TestIsCounterClockwise(t *testing.T) {
-	p := path(a, c, b, a)
+	p := path(a, e, b, a)
 	ok := p.IsClockwise()
-	assert.Equal(t, true, ok, "Path.IsClockwise failed to detect CW path")
-}
-
-func TestFlatten(t *testing.T) {
-	p1 := path(a, b)
-	p2 := path(b, c, d)
-	path := Path{}
-	if ok := path.Append(&p1); !ok {
-		t.Fatal("should be ok")
-	}
-	if ok := path.Append(&p2); !ok {
-		t.Fatal("should be ok")
-	}
-
-	path.Flatten()
-	pts := path.Points()
-	expPts := []v.Vector{a, b, c, d}
-
-	assert.Equal(t, expPts, pts, "Path.Flatten failed")
+	assert.Equal(t, true, ok, "Path.IsClockwise failed to detect CCW path")
 }
 
 // func TestHasInnerLoop(t *testing.T) {
