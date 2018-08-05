@@ -30,7 +30,7 @@ func (l Line) Equal(m Move) bool {
 }
 
 func (l Line) String() string {
-	return fmt.Sprintf("%s -> %s", l.From, l.To)
+	return fmt.Sprintf("(%.2f, %.2f) -> (%.2f, %.2f)", l.From.X, l.From.Y, l.To.X, l.To.Y)
 }
 
 // Arc is an arc from Start to End around Center, either CW or CCW
@@ -63,5 +63,5 @@ func (a Arc) Equal(m Move) bool {
 }
 
 func (a *Arc) String() string {
-	return fmt.Sprintf("%s ~> %s", a.From, a.To)
+	return fmt.Sprintf("(%.2f, %.2f) -> (%.2f, %.2f)", a.From.X, a.From.Y, a.To.X, a.To.Y)
 }
