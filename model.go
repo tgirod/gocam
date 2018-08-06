@@ -9,9 +9,9 @@ type Model []Path
 // Append Move to the model by concatenating it to an existing one if possible.
 func (m *Model) Append(mo Move) {
 	Log.Printf("Appending: %v\n", mo)
-	for _, p := range *m {
-		ok := p.Append(mo)
-		if ok {
+	for i := 0; i < len(*m); i++ {
+		p := &(*m)[i]
+		if ok := p.Append(mo); ok {
 			Log.Printf("updated path: %v", p)
 			return
 		}
