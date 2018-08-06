@@ -15,37 +15,35 @@ import (
 
 type Importer struct {
 	Precision float64
-	Ignored   int // number of ignored entities during import
+	Imported  int // number of imported entities
+	Ignored   int // number of ignored entities
 	Discarded int // number of discarded entities (duplicates)
+	Model     *Model
 }
 
 func NewImporter() *Importer {
 	return &Importer{
 		Precision: 1E2,
-		Ignored:   0,
-		Discarded: 0,
+		Model:     &Model{},
 	}
 }
 
-func (im *Importer) Import(stream io.Reader) (*Model, error) {
+func (im *Importer) Import(stream io.Reader) error {
 	doc, err := document.DxfDocumentFromStream(stream)
 	if err != nil {
-		return nil, err
+		return err
 	}
-
-	mod := &Model{}
 
 	Log.Println("Importing entities")
 	for _, e := range doc.Entities.Entities {
-		move := im.ImportEntity(e)
-		mod.Append(move)
+		im.ImportEntity(e)
 	}
 
-	Log.Println("Imported entities: ", len(*mod))
+	Log.Println("Imported entities: ", im.Imported)
 	Log.Println("Ignored entities:  ", im.Ignored)
 	Log.Println("Discarded entities:", im.Discarded)
 
-	return mod, nil
+	return nil
 }
 
 func (im *Importer) ImportPoint(p core.Point) v.Vector {
@@ -55,42 +53,43 @@ func (im *Importer) ImportPoint(p core.Point) v.Vector {
 	return v.Vector{x, y, z}
 }
 
-func (im *Importer) ImportEntity(e entities.Entity) Move {
+func (im *Importer) ImportEntity(e entities.Entity) {
 	switch e := e.(type) {
 	case *entities.Line:
-		return im.ImportLine(e)
+		im.ImportLine(e)
 	case *entities.Polyline:
-		return im.ImportPolyline(e)
+		im.ImportPolyline(e)
 	case *entities.LWPolyline:
-		return im.ImportLWPolyline(e)
+		im.ImportLWPolyline(e)
 	case *entities.Arc:
-		return im.ImportArc(e)
+		im.ImportArc(e)
 	case *entities.Circle:
-		return im.ImportCircle(e)
+		im.ImportCircle(e)
 	default:
 		Log.Printf("Ignored entity %T\n", e)
 		im.Ignored++
-		return nil
 	}
 }
 
-func (im *Importer) ImportLine(e *entities.Line) *Line {
+func (im *Importer) ImportLine(e *entities.Line) {
 	from := im.ImportPoint(e.Start)
 	to := im.ImportPoint(e.End)
-	return &Line{from, to}
+	im.Model.Append(&Line{from, to})
+	im.Imported++
 }
 
-func (im *Importer) ImportPolyline(e *entities.Polyline) Path {
+func (im *Importer) ImportPolyline(e *entities.Polyline) {
 	p := make(Path, 0, len(e.Vertices)-1)
 	for i := 0; i < len(e.Vertices)-1; i++ {
 		from := im.ImportPoint(e.Vertices[i].Location)
 		to := im.ImportPoint(e.Vertices[i+1].Location)
 		p = append(p, &Line{from, to})
 	}
-	return p
+	im.Model.Append(p)
+	im.Imported++
 }
 
-func (im *Importer) ImportLWPolyline(e *entities.LWPolyline) Path {
+func (im *Importer) ImportLWPolyline(e *entities.LWPolyline) {
 	pts := e.Points
 	p := make(Path, 0, len(pts)-1)
 	for i := 0; i < len(pts)-1; i++ {
@@ -110,10 +109,11 @@ func (im *Importer) ImportLWPolyline(e *entities.LWPolyline) Path {
 			p = append(p, &Arc{startPoint, endPoint, center, false})
 		}
 	}
-	return p
+	im.Model.Append(p)
+	im.Imported++
 }
 
-func (im *Importer) ImportArc(e *entities.Arc) *Arc {
+func (im *Importer) ImportArc(e *entities.Arc) {
 	center := im.ImportPoint(e.Center)
 	startAngle := deg2rad(e.StartAngle)
 	endAngle := deg2rad(e.EndAngle)
@@ -123,17 +123,20 @@ func (im *Importer) ImportArc(e *entities.Arc) *Arc {
 	radius := e.Radius
 	startPoint := pol2car(startAngle, radius).Sum(center)
 	endPoint := pol2car(endAngle, radius).Sum(center)
-	return &Arc{startPoint, endPoint, center, false}
+	im.Model.Append(&Arc{startPoint, endPoint, center, false})
+	im.Imported++
 }
 
 // import a circle as two 180 degrees arcs
-func (im *Importer) ImportCircle(e *entities.Circle) Path {
+func (im *Importer) ImportCircle(e *entities.Circle) {
 	center := im.ImportPoint(e.Center)
 	radius := e.Radius
 	a := center.Sum(v.Vector{radius, 0, 0})
 	b := center.Sum(v.Vector{-radius, 0, 0})
-	return Path{
+	p := Path{
 		&Arc{a, b, center, false},
 		&Arc{b, a, center, false},
 	}
+	im.Model.Append(p)
+	im.Imported++
 }

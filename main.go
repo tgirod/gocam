@@ -14,11 +14,10 @@ func main() {
 	}
 
 	im := NewImporter()
-	var mod *Model
-	if mod, err = im.Import(file); err != nil {
+	if err = im.Import(file); err != nil {
 		Log.Fatal(err)
 	}
 
-	doc := mod.Gcode()
+	doc := im.Model.Gcode()
 	fmt.Println(doc.Export(2))
 }
