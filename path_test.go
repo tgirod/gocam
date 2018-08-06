@@ -51,16 +51,10 @@ func TestAppendEmpty(t *testing.T) {
 	assert.Equal(t, &Path{ab}, p, "Path.Append didn't append the right thing")
 }
 
-func TestAppendExact(t *testing.T) {
+func TestAppend(t *testing.T) {
 	p := &Path{ab}
 	ok := p.Append(bc)
 	assert.Equal(t, ok, true, "cannot append move with shared end")
-}
-
-func TestAppendApproximate(t *testing.T) {
-	p := &Path{bc}
-	ok := p.Append(&Line{c2, d})
-	assert.Equal(t, true, ok, "cannot append move with approximate end")
 }
 
 func TestAppendFail(t *testing.T) {
@@ -90,6 +84,7 @@ func TestReverseOdd(t *testing.T) {
 
 func TestIsClosed(t *testing.T) {
 	p := path(a, b, c, a)
+	t.Log(p)
 	ok := p.IsClosed()
 	assert.Equal(t, true, ok, "Path.IsClosed failed")
 }

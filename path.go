@@ -1,11 +1,16 @@
 package main
 
 import (
+	"github.com/joushou/gocnc/gcode"
 	v "github.com/joushou/gocnc/vector"
 )
 
 // Path is a sequence of connected moves (Moves[i].To == Moves[i+1].From)
 type Path []Move
+
+func NewPath(m Move) Path {
+	return Path{m}
+}
 
 // Move represents anything that moves from point A to point B and can be reversed
 type Move interface {
@@ -71,7 +76,7 @@ func (p Path) Points() []v.Vector {
 	return pts
 }
 
-const EPSILON float64 = 0.001
+const EPSILON float64 = 1E-3
 
 func (p *Path) Append(m Move) bool {
 	// utility function
@@ -83,6 +88,10 @@ func (p *Path) Append(m Move) bool {
 		}
 	}
 
+	if p.IsClosed() {
+		return false
+	}
+
 	// empty path, always append
 	if len(*p) == 0 {
 		app()
@@ -91,15 +100,7 @@ func (p *Path) Append(m Move) bool {
 
 	_, pTo := p.Move()
 	mFrom, _ := m.Move()
-	// exact match, append
 	if pTo == mFrom {
-		app()
-		return true
-	}
-
-	// approximate match, append
-	dist := pTo.Diff(mFrom).Norm()
-	if dist < EPSILON {
 		app()
 		return true
 	}
@@ -111,7 +112,7 @@ func (p *Path) Append(m Move) bool {
 // IsClosed returns true if the path ends where it started
 func (p *Path) IsClosed() bool {
 	from, to := p.Move()
-	return from == to || from.Diff(to).Norm() < EPSILON
+	return len(*p) > 0 && from == to
 }
 
 // IsClockwise returns true if the path is running clockwise, false otherwise.
@@ -124,4 +125,23 @@ func (p Path) IsClockwise() bool {
 	}
 	// the curve is CW if the sum is positive, CCW if the sum is negative
 	return sum > 0
+}
+
+func (p Path) Gcode() []gcode.Block {
+	bs := []gcode.Block{}
+
+	// initial G0 move to the starting point
+	start, _ := p.Move()
+	bs = append(bs, move(start))
+
+	// subsequent G1 moves
+	for _, m := range p {
+		// add actual move (G1, G2 or G3)
+		if g, ok := m.(Gcoder); ok {
+			bs = append(bs, g.Gcode())
+		} else {
+			Log.Printf("Move of type %T does not implement Gcoder", m)
+		}
+	}
+	return bs
 }

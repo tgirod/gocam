@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	"github.com/joushou/gocnc/gcode"
 	v "github.com/joushou/gocnc/vector"
 )
 
@@ -30,7 +31,14 @@ func (l Line) Equal(m Move) bool {
 }
 
 func (l Line) String() string {
-	return fmt.Sprintf("(%.2f, %.2f) -> (%.2f, %.2f)", l.From.X, l.From.Y, l.To.X, l.To.Y)
+	return fmt.Sprintf("Line<(%.2f,%.2f)--(%.2f,%.2f)>", l.From.X, l.From.Y, l.To.X, l.To.Y)
+}
+
+func (l Line) Gcode() gcode.Block {
+	g := &gcode.Block{}
+	g.AppendNode(word('G', 1))
+	g.AppendNodes(xy(l.To)...)
+	return *g
 }
 
 // Arc is an arc from Start to End around Center, either CW or CCW
@@ -63,5 +71,21 @@ func (a Arc) Equal(m Move) bool {
 }
 
 func (a *Arc) String() string {
-	return fmt.Sprintf("(%.2f, %.2f) -> (%.2f, %.2f)", a.From.X, a.From.Y, a.To.X, a.To.Y)
+	return fmt.Sprintf("Arc<(%.2f,%.2f)--(%.2f, %.2f)>", a.From.X, a.From.Y, a.To.X, a.To.Y)
+}
+
+func (a Arc) Gcode() gcode.Block {
+	b := &gcode.Block{}
+	if a.CW {
+		b.AppendNode(word('G', 2))
+	} else {
+		b.AppendNode(word('G', 3))
+	}
+
+	// arc's endpoint
+	b.AppendNodes(xy(a.To)...)
+	// center (relative to the start)
+	center := a.Center.Diff(a.From)
+	b.AppendNodes(ij(center)...)
+	return *b
 }
