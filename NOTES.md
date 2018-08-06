@@ -11,6 +11,13 @@ Pour plus tard :
 - [ ] Overcut (mouvement spécial)
 - [ ] Algo offset avec les îles (but premier de ce programme)
 
+# 2018.08.06
+
+Avec un regard frais, j'ai découvert un truc tout simple : je peux me
+simplifier la vie en approximant toutes les coordonnées. Quand j'importe un
+point depuis le fichier DXF, je limite la précision. Comme ça, quand j'importe
+un arc, l'approximation dûe aux calculs trigo est négligeable.
+
 # 2018.02.02
 
 Reprenons l'algo d'import DXF
@@ -19,11 +26,11 @@ Reprenons l'algo d'import DXF
 
 Importer d'abord les entités qui définissent directement leurs extrémités (pas
 les arcs). Ajouter les sommets dans un dictionnaire. Importer ensuite les arcs,
-qui nécessitent un calcul trigo pour en connaitre les extrémités. 
+qui nécessitent un calcul trigo pour en connaitre les extrémités.
 
 Pour chaque sommet, on vérifie si il existe déjà un sommet suffisament proche
 dans le dictionnaire. Si oui, on utilise le sommet existant à la place du
-sommet calculé. 
+sommet calculé.
 
 ## combiner les entités pour former des chemins
 
@@ -96,7 +103,7 @@ Cette procédure a cependant plusieurs problèmes :
 C'est là que gocam entre en jeu. J'ai essayé de l'utiliser pour faire la
 conversion DXF -> Gcode, et c'est pas loin de marcher ! Il y a encore un peu de
 boulot, mais au moins mon implémentation sort quelque chose sans faire planter
-ma machine. 
+ma machine.
 
 Conclusion : Reprendre le code dxf -> gcode, et en faire un outil robuste -
 c'est déjà une fonctionnalité utile.
