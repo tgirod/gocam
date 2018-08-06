@@ -22,6 +22,10 @@ func (m *Model) Append(mo Move) {
 	Log.Printf("new path: %v", *p)
 }
 
+func (m *Model) Join() {
+
+}
+
 func (m *Model) Gcode() gcode.Document {
 	doc := &gcode.Document{}
 	for _, p := range *m {
