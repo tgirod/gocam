@@ -14,7 +14,7 @@ import (
 )
 
 type Importer struct {
-	Precision float64
+	Precision int
 	Imported  int // number of imported entities
 	Ignored   int // number of ignored entities
 	Discarded int // number of discarded entities (duplicates)
