@@ -32,7 +32,10 @@ func (m *Model) Merge() {
 
 func (m *Model) Gcode() gcode.Document {
 	doc := &gcode.Document{}
-	for _, p := range *m {
+	for i, p := range *m {
+		h := gcode.Block{}
+		h.AppendNode(header(i))
+		doc.Blocks = append(doc.Blocks, h)
 		bs := p.Gcode()
 		doc.Blocks = append(doc.Blocks, bs...)
 	}
