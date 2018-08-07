@@ -99,8 +99,15 @@ func (p *Path) Append(m Move) bool {
 	}
 
 	_, pTo := p.Move()
-	mFrom, _ := m.Move()
+	mFrom, mTo := m.Move()
+	// append to existing path
 	if pTo == mFrom {
+		app()
+		return true
+	}
+	// reverse and append to existing path
+	if pTo == mTo {
+		m.Reverse()
 		app()
 		return true
 	}
