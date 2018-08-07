@@ -23,7 +23,7 @@ type Importer struct {
 
 func NewImporter() *Importer {
 	return &Importer{
-		Precision: 1E2,
+		Precision: 3,
 		Model:     &Model{},
 	}
 }
@@ -47,9 +47,10 @@ func (im *Importer) Import(stream io.Reader) error {
 }
 
 func (im *Importer) ImportPoint(p core.Point) v.Vector {
-	x := math.Floor(p.X*im.Precision) / im.Precision
-	y := math.Floor(p.Y*im.Precision) / im.Precision
-	z := math.Floor(p.Z*im.Precision) / im.Precision
+	pre := math.Pow10(im.Precision)
+	x := math.Floor(p.X*pre) / pre
+	y := math.Floor(p.Y*pre) / pre
+	z := math.Floor(p.Z*pre) / pre
 	return v.Vector{x, y, z}
 }
 

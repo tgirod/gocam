@@ -19,5 +19,5 @@ func main() {
 	}
 
 	doc := im.Model.Gcode()
-	fmt.Println(doc.Export(2))
+	fmt.Println(doc.Export(im.Precision))
 }
