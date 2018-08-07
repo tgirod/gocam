@@ -38,6 +38,7 @@ func (im *Importer) Import(stream io.Reader) error {
 	for _, e := range doc.Entities.Entities {
 		im.ImportEntity(e)
 	}
+	im.Model.Merge()
 
 	Log.Println("Imported entities: ", im.Imported)
 	Log.Println("Ignored entities:  ", im.Ignored)

@@ -22,8 +22,15 @@ func (m *Model) Append(mo Move) {
 	Log.Printf("new path: %v", *p)
 }
 
-func (m *Model) Join() {
-
+func (m *Model) Merge() {
+	l := len(*m)
+	for i := 0; i < l; i++ {
+		// extract the first path
+		p := (*m)[0]
+		*m = (*m)[1:]
+		// re-append it
+		m.Append(p)
+	}
 }
 
 func (m *Model) Gcode() gcode.Document {
