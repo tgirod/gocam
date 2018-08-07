@@ -88,6 +88,14 @@ func (p *Path) Append(m Move) bool {
 		}
 	}
 
+	prep := func() {
+		if mPath, ok := m.(Path); ok {
+			*p = append(mPath, (*p)...)
+		} else {
+			*p = append(Path{m}, (*p)...)
+		}
+	}
+
 	if p.IsClosed() {
 		return false
 	}
@@ -98,17 +106,28 @@ func (p *Path) Append(m Move) bool {
 		return true
 	}
 
-	_, pTo := p.Move()
+	pFrom, pTo := p.Move()
 	mFrom, mTo := m.Move()
-	// append to existing path
+	// append
 	if pTo == mFrom {
 		app()
 		return true
 	}
-	// reverse and append to existing path
+	// reverse append
 	if pTo == mTo {
 		m.Reverse()
 		app()
+		return true
+	}
+	// prepend
+	if mTo == pFrom {
+		prep()
+		return true
+	}
+	// reverse prepend
+	if mFrom == pFrom {
+		m.Reverse()
+		prep()
 		return true
 	}
 
