@@ -7,6 +7,7 @@ import (
 	"io"
 	"math"
 
+	"github.com/davecgh/go-spew/spew"
 	v "github.com/joushou/gocnc/vector"
 	"github.com/rpaloschi/dxf-go/core"
 	"github.com/rpaloschi/dxf-go/document"
@@ -67,6 +68,8 @@ func (im *Importer) ImportEntity(e entities.Entity) {
 		im.ImportArc(e)
 	case *entities.Circle:
 		im.ImportCircle(e)
+	case *entities.Spline:
+		im.ImportSpline(e)
 	default:
 		Log.Printf("Ignored entity %T\n", e)
 		im.Ignored++
@@ -141,4 +144,8 @@ func (im *Importer) ImportCircle(e *entities.Circle) {
 	}
 	im.Model.Append(p)
 	im.Imported++
+}
+
+func (im *Importer) ImportSpline(e *entities.Spline) {
+	spew.Dump(e)
 }
