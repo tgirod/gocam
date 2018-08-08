@@ -37,8 +37,9 @@ func (s Spline) n(i, k int, u float64) float64 {
 		}
 	} else {
 		// general case
-		return (u-t[i])/(t[i+k]-t[i])*s.n(i, k-1, u) +
-			(t[i+k+1]-u)/(t[i+k+1]-t[i+1])*s.n(i+1, k-1, u)
+		term1 := (u - t[i]) / (t[i+k] - t[i]) * s.n(i, k-1, u)
+		term2 := (t[i+k+1] - u) / (t[i+k+1] - t[i+1]) * s.n(i+1, k-1, u)
+		return term1 + term2
 	}
 }
 

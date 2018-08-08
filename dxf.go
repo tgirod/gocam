@@ -4,10 +4,10 @@ package main
 // internal representation of the program
 
 import (
-	"fmt"
 	"io"
 	"math"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/rpaloschi/dxf-go/core"
 	"github.com/rpaloschi/dxf-go/document"
 	"github.com/rpaloschi/dxf-go/entities"
@@ -166,11 +166,12 @@ func (im *Importer) ImportSpline(e *entities.Spline) {
 	// FIXME
 	// im.Model.Append(s)
 	// im.Imported++
-	max := float64(s.Knots[len(s.Knots)-1])
-	for i := 0; i < 101; i++ {
-		u := float64(i) / 100 * max
-		s.eval(u)
-		fmt.Println("u", u)
-		// fmt.Printf("%f %f\n", v.X, v.Y)
-	}
+	spew.Dump(s)
+	// max := float64(s.Knots[len(s.Knots)-1])
+	// for i := 0; i < 101; i++ {
+	// 	u := float64(i) / 100 * max
+	// 	s.eval(u)
+	// 	fmt.Println("u", u)
+	// 	// fmt.Printf("%f %f\n", v.X, v.Y)
+	// }
 }
