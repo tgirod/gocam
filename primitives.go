@@ -69,7 +69,7 @@ func (a Arc) Equal(m Move) bool {
 	return false
 }
 
-func (a *Arc) String() string {
+func (a Arc) String() string {
 	return fmt.Sprintf("Arc<(%.2f,%.2f)--(%.2f, %.2f)>", a.From.X, a.From.Y, a.To.X, a.To.Y)
 }
 
