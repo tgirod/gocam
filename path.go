@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/joushou/gocnc/gcode"
-	v "github.com/joushou/gocnc/vector"
 )
 
 // Path is a sequence of connected moves (Moves[i].To == Moves[i+1].From)
@@ -14,15 +13,15 @@ func NewPath(m Move) Path {
 
 // Move represents anything that moves from point A to point B and can be reversed
 type Move interface {
-	Move() (v.Vector, v.Vector)
+	Move() (Vector, Vector)
 	Reverse()
 	Equal(Move) bool
 }
 
 // Move returns the start and end points of the path
-func (p Path) Move() (v.Vector, v.Vector) {
+func (p Path) Move() (Vector, Vector) {
 	if len(p) == 0 {
-		return v.Vector{}, v.Vector{}
+		return Vector{}, Vector{}
 	} else {
 		from, _ := p[0].Move()
 		_, to := p[len(p)-1].Move()
@@ -64,8 +63,8 @@ func (p Path) Equal(m Move) bool {
 	return true
 }
 
-func (p Path) Points() []v.Vector {
-	pts := make([]v.Vector, 0, len(p)+1)
+func (p Path) Points() []Vector {
+	pts := make([]Vector, 0, len(p)+1)
 	for i, m := range p {
 		from, to := m.Move()
 		if i == 0 {

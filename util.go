@@ -4,8 +4,6 @@ import (
 	"log"
 	"math"
 	"os"
-
-	v "github.com/joushou/gocnc/vector"
 )
 
 // Log is used to print logs to stderr.
@@ -17,15 +15,15 @@ func deg2rad(angle float64) float64 {
 }
 
 // Cartesian converts polar coordinates to cartesian.
-func pol2car(angle float64, radius float64) v.Vector {
-	p := v.Vector{}
+func pol2car(angle float64, radius float64) Vector {
+	p := Vector{}
 	p.X = radius * math.Cos(angle)
 	p.Y = radius * math.Sin(angle)
 	return p
 }
 
 // Polar converts cartesian coordinates to polar (angle, radius).
-func car2pol(p v.Vector) (float64, float64) {
+func car2pol(p Vector) (float64, float64) {
 	radius := math.Sqrt(math.Pow(p.X, 2) + math.Pow(p.Y, 2))
 	angle := math.Atan2(p.Y, p.X)
 	return angle, radius
@@ -38,7 +36,7 @@ func car2pol(p v.Vector) (float64, float64) {
 // Bulge > 0: CCW arc
 // Bulge < 0: CW arc
 // Bulge == 1: semi-circle
-func arcToBulge(center v.Vector, radius float64, startAngle float64, endAngle float64) (v.Vector, v.Vector, float64) {
+func arcToBulge(center Vector, radius float64, startAngle float64, endAngle float64) (Vector, Vector, float64) {
 	startPoint := pol2car(startAngle, radius).Sum(center)
 	endPoint := pol2car(endAngle, radius).Sum(center)
 	// bulge conversion
@@ -48,7 +46,7 @@ func arcToBulge(center v.Vector, radius float64, startAngle float64, endAngle fl
 }
 
 // BulgeToArc converts line+bulge arc representation to dxf representation.
-func bulgeToArc(p1 v.Vector, p2 v.Vector, bulge float64) (v.Vector, float64, float64, float64) {
+func bulgeToArc(p1 Vector, p2 Vector, bulge float64) (Vector, float64, float64, float64) {
 	theta2 := 2 * math.Atan(bulge) // half of included angle
 	chord := p2.Diff(p1)           // chord of the arc
 	d := chord.Norm() / 2          // half of the chord's length
@@ -68,6 +66,6 @@ func bulgeToArc(p1 v.Vector, p2 v.Vector, bulge float64) (v.Vector, float64, flo
 	return center, radius, startAngle, endAngle
 }
 
-func vec2angle(v v.Vector) float64 {
+func vec2angle(v Vector) float64 {
 	return math.Atan2(v.Y, v.X)
 }

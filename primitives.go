@@ -4,17 +4,16 @@ import (
 	"fmt"
 
 	"github.com/joushou/gocnc/gcode"
-	v "github.com/joushou/gocnc/vector"
 )
 
 // Line is a straight path from Start to End
 type Line struct {
-	From v.Vector
-	To   v.Vector
+	From Vector
+	To   Vector
 }
 
 // Move returns the start and end points of the line
-func (l Line) Move() (v.Vector, v.Vector) {
+func (l Line) Move() (Vector, Vector) {
 	return l.From, l.To
 }
 
@@ -43,14 +42,14 @@ func (l Line) Gcode() gcode.Block {
 
 // Arc is an arc from Start to End around Center, either CW or CCW
 type Arc struct {
-	From   v.Vector
-	To     v.Vector
-	Center v.Vector
+	From   Vector
+	To     Vector
+	Center Vector
 	CW     bool
 }
 
 // Move returns the start and end point of the arc
-func (a *Arc) Move() (v.Vector, v.Vector) {
+func (a Arc) Move() (Vector, Vector) {
 	return a.From, a.To
 }
 
