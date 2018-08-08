@@ -4,6 +4,7 @@ package main
 // internal representation of the program
 
 import (
+	"fmt"
 	"io"
 	"math"
 
@@ -145,5 +146,31 @@ func (im *Importer) ImportCircle(e *entities.Circle) {
 }
 
 func (im *Importer) ImportSpline(e *entities.Spline) {
-	spew.Dump(e)
+	// FIXME
+	s := &Spline{}
+	s.Degree = e.Degree
+	s.Closed = e.Closed
+	s.Knots = e.KnotValues
+	s.Controls = make([]Vector, len(e.ControlPoints))
+	for i, p := range e.ControlPoints {
+		s.Controls[i] = im.ImportPoint(p)
+	}
+	if len(e.Weights) != 0 {
+		s.Weights = e.Weights
+	} else {
+		s.Weights = make([]float64, len(s.Controls))
+		for i := range s.Controls {
+			s.Weights[i] = 1
+		}
+	}
+	// FIXME
+	// im.Model.Append(s)
+	// im.Imported++
+	max := float64(s.Knots[len(s.Knots)-1])
+	for i := 0; i < 101; i++ {
+		u := float64(i) / 100 * max
+		s.eval(u)
+		fmt.Println("u", u)
+		// fmt.Printf("%f %f\n", v.X, v.Y)
+	}
 }

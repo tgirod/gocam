@@ -88,3 +88,28 @@ func (a Arc) Gcode() gcode.Block {
 	b.AppendNodes(ij(center)...)
 	return *b
 }
+
+type Spline struct {
+	Degree   int
+	Closed   bool
+	Knots    []float64
+	Controls []Vector
+	Weights  []float64
+}
+
+func (s Spline) Move() (Vector, Vector) {
+	// FIXME
+	return Vector{}, Vector{}
+}
+
+func (s *Spline) Reverse() {
+	// FIXME
+}
+
+func (s Spline) Equal(m Move) bool {
+	// FIXME
+	if _, ok := m.(*Spline); ok {
+		return true
+	}
+	return false
+}

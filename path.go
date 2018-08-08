@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/davecgh/go-spew/spew"
 	"github.com/joushou/gocnc/gcode"
 )
 
@@ -166,6 +167,7 @@ func (p Path) Gcode() []gcode.Block {
 			bs = append(bs, g.Gcode())
 		} else {
 			Log.Printf("Move of type %T does not implement Gcoder", m)
+			spew.Dump(m)
 		}
 	}
 	return bs
