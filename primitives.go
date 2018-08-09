@@ -98,12 +98,31 @@ type Spline struct {
 }
 
 func (s Spline) Move() (Vector, Vector) {
-	// FIXME
-	return Vector{}, Vector{}
+	kMin := s.Knots[0]
+	kMax := s.Knots[len(s.Knots)-1]
+	from := s.eval(kMin)
+	to := s.eval(kMax)
+	return from, to
 }
 
 func (s *Spline) Reverse() {
-	// FIXME
+	// reverse knots
+	for i := 0; i < len(s.Knots)/2; i++ {
+		j := len(s.Knots) - i - 1
+		s.Knots[i], s.Knots[j] = s.Knots[j], s.Knots[i]
+	}
+
+	// reverse controls
+	for i := 0; i < len(s.Controls)/2; i++ {
+		j := len(s.Controls) - i - 1
+		s.Controls[i], s.Controls[j] = s.Controls[j], s.Controls[i]
+	}
+
+	// reverse weights
+	for i := 0; i < len(s.Weights)/2; i++ {
+		j := len(s.Weights) - i - 1
+		s.Weights[i], s.Weights[j] = s.Weights[j], s.Weights[i]
+	}
 }
 
 func (s Spline) Equal(m Move) bool {
