@@ -6,6 +6,17 @@ Gocam is a tool to produce Gcode from DXF files in order to pilot a CNC router. 
 - piecewise linear approximation
 - better UI with options on the commandline
 
+# Resources
+
+- [offset algorithm for polyline curves](https://seant23.files.wordpress.com/2010/11/anoffsetalgorithm.pdf)
+- [divide and conquer NURBS to into polylines](https://www.bfft.de/en/techblog-eng/bfft-techblog-mai-divide-and-conquer-nurbs-into-polylines/)
+
+# 2018-08-09
+
+Merged early support for splines. Right now all I have is a function to evaluate a spline, ie I pass a value representing a point between the start and the end of the spline and I get the corresponding coordinates.
+
+As splines are not supported by grbl, my goal is to approximate them with polylines (hopefully lines and arcs) and work with that.
+
 # 2018-08-07
 
 Rewrote a good part of the program. It should behave the same, but maybe faster.
