@@ -1,15 +1,17 @@
 Gocam is a tool to produce Gcode from DXF files in order to pilot a CNC router. It is inspired by [bCNC](https://github.com/vlachoudis/bCNC/) and aims to work with simple 2.5D models. **This is a very long-term goal**. Right now all it does is converting a DXF file to Gcode.
 
+# Resources
+
+- [offset algorithm for polyline curves](https://seant23.files.wordpress.com/2010/11/anoffsetalgorithm.pdf)
+- [divide and conquer NURBS into polylines](https://www.bfft.de/en/techblog-eng/bfft-techblog-mai-divide-and-conquer-nurbs-into-polylines/)
+
 # TODO
 
 - splines
 - piecewise linear approximation
 - better UI with options on the commandline
 
-# Resources
-
-- [offset algorithm for polyline curves](https://seant23.files.wordpress.com/2010/11/anoffsetalgorithm.pdf)
-- [divide and conquer NURBS into polylines](https://www.bfft.de/en/techblog-eng/bfft-techblog-mai-divide-and-conquer-nurbs-into-polylines/)
+Greville abscissae: mean of k-1 knots. Can be used as starting points to approximate the shape of the spline. Then subdivide the parts until the error is bellow a threshold.
 
 # 2018-08-09
 
