@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/joushou/gocnc/gcode"
-	v "github.com/joushou/gocnc/vector"
 )
 
 type Gcoder interface {
@@ -24,21 +23,21 @@ func header(id int) gcode.Node {
 	}
 }
 
-func xy(v v.Vector) []gcode.Node {
+func xy(v Vector) []gcode.Node {
 	return []gcode.Node{
 		word('X', v.X),
 		word('Y', v.Y),
 	}
 }
 
-func ij(v v.Vector) []gcode.Node {
+func ij(v Vector) []gcode.Node {
 	return []gcode.Node{
 		word('I', v.X),
 		word('J', v.Y),
 	}
 }
 
-func move(v v.Vector) gcode.Block {
+func move(v Vector) gcode.Block {
 	return gcode.Block{
 		Nodes: []gcode.Node{
 			word('G', 0),

@@ -1,8 +1,8 @@
 package main
 
 import (
+	"github.com/davecgh/go-spew/spew"
 	"github.com/joushou/gocnc/gcode"
-	v "github.com/joushou/gocnc/vector"
 )
 
 // Path is a sequence of connected moves (Moves[i].To == Moves[i+1].From)
@@ -14,15 +14,15 @@ func NewPath(m Move) Path {
 
 // Move represents anything that moves from point A to point B and can be reversed
 type Move interface {
-	Move() (v.Vector, v.Vector)
+	Move() (Vector, Vector)
 	Reverse()
 	Equal(Move) bool
 }
 
 // Move returns the start and end points of the path
-func (p Path) Move() (v.Vector, v.Vector) {
+func (p Path) Move() (Vector, Vector) {
 	if len(p) == 0 {
-		return v.Vector{}, v.Vector{}
+		return Vector{}, Vector{}
 	} else {
 		from, _ := p[0].Move()
 		_, to := p[len(p)-1].Move()
@@ -32,19 +32,16 @@ func (p Path) Move() (v.Vector, v.Vector) {
 
 // Reverse reverses path p, and all its composing moves
 func (p Path) Reverse() {
-	i := 0
-	j := len(p) - 1
 
-	for i <= j {
-		if i == j {
-			p[i].Reverse()
-		} else {
-			p[i].Reverse()
-			p[j].Reverse()
-			p[i], p[j] = p[j], p[i]
-		}
-		i++
-		j--
+	for i := 0; i < len(p)/2; i++ {
+		j := len(p) - 1 - i
+		p[i].Reverse()
+		p[j].Reverse()
+		p[i], p[j] = p[j], p[i]
+	}
+	// don't forget to reverse the middle move for odd sized paths
+	if len(p)%2 == 1 {
+		p[len(p)/2].Reverse()
 	}
 }
 
@@ -64,8 +61,8 @@ func (p Path) Equal(m Move) bool {
 	return true
 }
 
-func (p Path) Points() []v.Vector {
-	pts := make([]v.Vector, 0, len(p)+1)
+func (p Path) Points() []Vector {
+	pts := make([]Vector, 0, len(p)+1)
 	for i, m := range p {
 		from, to := m.Move()
 		if i == 0 {
@@ -167,6 +164,7 @@ func (p Path) Gcode() []gcode.Block {
 			bs = append(bs, g.Gcode())
 		} else {
 			Log.Printf("Move of type %T does not implement Gcoder", m)
+			spew.Dump(m)
 		}
 	}
 	return bs

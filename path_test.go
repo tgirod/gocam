@@ -3,17 +3,16 @@ package main
 import (
 	"testing"
 
-	v "github.com/joushou/gocnc/vector"
 	"github.com/stretchr/testify/assert"
 )
 
-var a, b, c, d = v.Vector{0, 0, 0}, v.Vector{1, 0, 0}, v.Vector{2, 0, 0}, v.Vector{3, 0, 0}
-var e = v.Vector{1, 1, 0}
+var a, b, c, d = Vector{0, 0, 0}, Vector{1, 0, 0}, Vector{2, 0, 0}, Vector{3, 0, 0}
+var e = Vector{1, 1, 0}
 var ab, bc, cd = &Line{a, b}, &Line{b, c}, &Line{c, d}
 var ba, cb, dc = &Line{b, a}, &Line{c, b}, &Line{d, c}
-var c2 = c.Sum(v.Vector{EPSILON / 2, 0, 0})
+var c2 = c.Sum(Vector{EPSILON / 2, 0, 0})
 
-func path(points ...v.Vector) *Path {
+func path(points ...Vector) *Path {
 	p := Path{}
 	for i := 0; i < len(points)-1; i++ {
 		from := points[i]
@@ -40,7 +39,7 @@ func TestPoints(t *testing.T) {
 		ab,
 		bc,
 	}
-	pts := []v.Vector{a, b, c}
+	pts := []Vector{a, b, c}
 	assert.Equal(t, pts, p.Points(), "Path.Points failed")
 }
 

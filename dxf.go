@@ -4,10 +4,10 @@ package main
 // internal representation of the program
 
 import (
+	"fmt"
 	"io"
 	"math"
 
-	v "github.com/joushou/gocnc/vector"
 	"github.com/rpaloschi/dxf-go/core"
 	"github.com/rpaloschi/dxf-go/document"
 	"github.com/rpaloschi/dxf-go/entities"
@@ -47,12 +47,12 @@ func (im *Importer) Import(stream io.Reader) error {
 	return nil
 }
 
-func (im *Importer) ImportPoint(p core.Point) v.Vector {
+func (im *Importer) ImportPoint(p core.Point) Vector {
 	pre := math.Pow10(im.Precision)
 	x := math.Floor(p.X*pre) / pre
 	y := math.Floor(p.Y*pre) / pre
 	z := math.Floor(p.Z*pre) / pre
-	return v.Vector{x, y, z}
+	return Vector{x, y, z}
 }
 
 func (im *Importer) ImportEntity(e entities.Entity) {
@@ -67,6 +67,8 @@ func (im *Importer) ImportEntity(e entities.Entity) {
 		im.ImportArc(e)
 	case *entities.Circle:
 		im.ImportCircle(e)
+	case *entities.Spline:
+		im.ImportSpline(e)
 	default:
 		Log.Printf("Ignored entity %T\n", e)
 		im.Ignored++
@@ -133,12 +135,42 @@ func (im *Importer) ImportArc(e *entities.Arc) {
 func (im *Importer) ImportCircle(e *entities.Circle) {
 	center := im.ImportPoint(e.Center)
 	radius := e.Radius
-	a := center.Sum(v.Vector{radius, 0, 0})
-	b := center.Sum(v.Vector{-radius, 0, 0})
+	a := center.Sum(Vector{radius, 0, 0})
+	b := center.Sum(Vector{-radius, 0, 0})
 	p := Path{
 		&Arc{a, b, center, false},
 		&Arc{b, a, center, false},
 	}
 	im.Model.Append(p)
 	im.Imported++
+}
+
+func (im *Importer) ImportSpline(e *entities.Spline) {
+	// FIXME
+	s := &Spline{}
+	s.Degree = e.Degree
+	s.Closed = e.Closed
+	s.Knots = e.KnotValues
+	s.Controls = make([]Vector, len(e.ControlPoints))
+	for i, p := range e.ControlPoints {
+		s.Controls[i] = im.ImportPoint(p)
+	}
+	if len(e.Weights) != 0 {
+		s.Weights = e.Weights
+	} else {
+		s.Weights = make([]float64, len(s.Controls))
+		for i := range s.Controls {
+			s.Weights[i] = 1
+		}
+	}
+	// FIXME
+	// im.Model.Append(s)
+	// im.Imported++
+	// spew.Dump(s)
+	max := float64(s.Knots[len(s.Knots)-1])
+	for i := 0; i < 100; i++ {
+		u := float64(i) / 100 * max
+		v := s.eval(u)
+		fmt.Printf("%f %f\n", v.X, v.Y)
+	}
 }

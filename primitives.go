@@ -4,17 +4,16 @@ import (
 	"fmt"
 
 	"github.com/joushou/gocnc/gcode"
-	v "github.com/joushou/gocnc/vector"
 )
 
 // Line is a straight path from Start to End
 type Line struct {
-	From v.Vector
-	To   v.Vector
+	From Vector
+	To   Vector
 }
 
 // Move returns the start and end points of the line
-func (l Line) Move() (v.Vector, v.Vector) {
+func (l Line) Move() (Vector, Vector) {
 	return l.From, l.To
 }
 
@@ -43,14 +42,14 @@ func (l Line) Gcode() gcode.Block {
 
 // Arc is an arc from Start to End around Center, either CW or CCW
 type Arc struct {
-	From   v.Vector
-	To     v.Vector
-	Center v.Vector
+	From   Vector
+	To     Vector
+	Center Vector
 	CW     bool
 }
 
 // Move returns the start and end point of the arc
-func (a *Arc) Move() (v.Vector, v.Vector) {
+func (a Arc) Move() (Vector, Vector) {
 	return a.From, a.To
 }
 
@@ -70,7 +69,7 @@ func (a Arc) Equal(m Move) bool {
 	return false
 }
 
-func (a *Arc) String() string {
+func (a Arc) String() string {
 	return fmt.Sprintf("Arc<(%.2f,%.2f)--(%.2f, %.2f)>", a.From.X, a.From.Y, a.To.X, a.To.Y)
 }
 
@@ -88,4 +87,48 @@ func (a Arc) Gcode() gcode.Block {
 	center := a.Center.Diff(a.From)
 	b.AppendNodes(ij(center)...)
 	return *b
+}
+
+type Spline struct {
+	Degree   int
+	Closed   bool
+	Knots    []float64
+	Controls []Vector
+	Weights  []float64
+}
+
+func (s Spline) Move() (Vector, Vector) {
+	kMin := s.Knots[0]
+	kMax := s.Knots[len(s.Knots)-1]
+	from := s.eval(kMin)
+	to := s.eval(kMax)
+	return from, to
+}
+
+func (s *Spline) Reverse() {
+	// reverse knots
+	for i := 0; i < len(s.Knots)/2; i++ {
+		j := len(s.Knots) - i - 1
+		s.Knots[i], s.Knots[j] = s.Knots[j], s.Knots[i]
+	}
+
+	// reverse controls
+	for i := 0; i < len(s.Controls)/2; i++ {
+		j := len(s.Controls) - i - 1
+		s.Controls[i], s.Controls[j] = s.Controls[j], s.Controls[i]
+	}
+
+	// reverse weights
+	for i := 0; i < len(s.Weights)/2; i++ {
+		j := len(s.Weights) - i - 1
+		s.Weights[i], s.Weights[j] = s.Weights[j], s.Weights[i]
+	}
+}
+
+func (s Spline) Equal(m Move) bool {
+	// FIXME
+	if _, ok := m.(*Spline); ok {
+		return true
+	}
+	return false
 }
