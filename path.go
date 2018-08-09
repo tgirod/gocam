@@ -32,19 +32,16 @@ func (p Path) Move() (Vector, Vector) {
 
 // Reverse reverses path p, and all its composing moves
 func (p Path) Reverse() {
-	i := 0
-	j := len(p) - 1
 
-	for i <= j {
-		if i == j {
-			p[i].Reverse()
-		} else {
-			p[i].Reverse()
-			p[j].Reverse()
-			p[i], p[j] = p[j], p[i]
-		}
-		i++
-		j--
+	for i := 0; i < len(p)/2; i++ {
+		j := len(p) - 1 - i
+		p[i].Reverse()
+		p[j].Reverse()
+		p[i], p[j] = p[j], p[i]
+	}
+	// don't forget to reverse the middle move for odd sized paths
+	if len(p)%2 == 1 {
+		p[len(p)/2].Reverse()
 	}
 }
 
