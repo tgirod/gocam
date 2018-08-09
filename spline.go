@@ -1,7 +1,5 @@
 package main
 
-import "fmt"
-
 // De Boor's B-Spline evaluation algorithm, based on
 // https://en.wikipedia.org/wiki/De_Boor's_algorithm#Example_implementation
 // k: index of knot interval that contains x
@@ -37,8 +35,14 @@ func (s Spline) n(i, k int, u float64) float64 {
 		}
 	} else {
 		// general case
-		term1 := (u - t[i]) / (t[i+k] - t[i]) * s.n(i, k-1, u)
-		term2 := (t[i+k+1] - u) / (t[i+k+1] - t[i+1]) * s.n(i+1, k-1, u)
+		term1 := 0.0
+		if t[i+k] > t[i] {
+			term1 = (u - t[i]) / (t[i+k] - t[i]) * s.n(i, k-1, u)
+		}
+		term2 := 0.0
+		if t[i+k+1] > t[i+1] {
+			term2 = (t[i+k+1] - u) / (t[i+k+1] - t[i+1]) * s.n(i+1, k-1, u)
+		}
 		return term1 + term2
 	}
 }
@@ -52,10 +56,9 @@ func (s Spline) eval(u float64) Vector {
 	div := 0.0
 	for i := 0; i < n; i++ {
 		fact := w[i] * s.n(i, k, u)
-		fmt.Println(i, fact)
-		res.Sum(P[i].Multiply(fact))
+		v := P[i].Multiply(fact)
+		res = res.Sum(v)
 		div += fact
 	}
-	res.Divide(div)
-	return res
+	return res.Divide(div)
 }
