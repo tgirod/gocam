@@ -9,7 +9,7 @@ Gocam is a tool to produce Gcode from DXF files in order to pilot a CNC router. 
 # Resources
 
 - [offset algorithm for polyline curves](https://seant23.files.wordpress.com/2010/11/anoffsetalgorithm.pdf)
-- [divide and conquer NURBS to into polylines](https://www.bfft.de/en/techblog-eng/bfft-techblog-mai-divide-and-conquer-nurbs-into-polylines/)
+- [divide and conquer NURBS into polylines](https://www.bfft.de/en/techblog-eng/bfft-techblog-mai-divide-and-conquer-nurbs-into-polylines/)
 
 # 2018-08-09
 
