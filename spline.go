@@ -42,11 +42,41 @@ func (s Spline) eval(u float64) Vector {
 	return res.Divide(div)
 }
 
+/*
+
+This is not used yet, as I'm still unsure about how it works. I think the
+principle is this:
+
+0. evaluate NURBS at position u
+1. find k, the index of the knot span associated to u (findKnotSpan)
+2. get the respective influence of the local control points (findKnotSpan)
+3. get the local control points (how ?)
+4. compute the weighted mean between the control points
+*/
+
+// based on https://github.com/mfem/mfem/blob/master/mesh/nurbs.cpp#L214
+func (s Spline) findKnotSpan(u float64) int {
+	order := s.Degree + 1
+	var low, mid, high int
+	if u == s.Knots[len(s.Controls)+order] {
+		mid = len(s.Controls)
+	} else {
+		low = order
+		high = len(s.Controls) + 1
+		mid = (low + high) / 2
+		for (u < s.Knots[mid-1]) || (u > s.Knots[mid]) {
+			if u < s.Knots[mid-1] {
+				high = mid
+			} else {
+				low = mid
+			}
+			mid = (low + high) / 2
+		}
+	}
+	return mid
+}
+
 // based on https://www.researchgate.net/publication/228411721/
-//
-// If I get this right, this function returns an array containing the influence
-// of p control points the position u ? To use that, I have to first find k,
-// the relevant knot span.
 func (s Spline) basisITS0(k, p int, u float64) []float64 {
 	N := make([]float64, p, p)     // FIXME
 	L := make([]float64, p+1, p+1) // FIXME
@@ -65,28 +95,4 @@ func (s Spline) basisITS0(k, p int, u float64) []float64 {
 		N[j] = saved
 	}
 	return N
-}
-
-// based on https://github.com/mfem/mfem/blob/master/mesh/nurbs.cpp#L214
-func (s Spline) findKnotSpan(u float64) int {
-	order := s.Degree + 1
-	var low, mid, high int
-
-	if u == s.Knots[len(s.Controls)+order] {
-		mid = len(s.Controls)
-	} else {
-		low = order
-		high = len(s.Controls) + 1
-		mid = (low + high) / 2
-
-		for (u < s.Knots[mid-1]) || (u > s.Knots[mid]) {
-			if u < s.Knots[mid-1] {
-				high = mid
-			} else {
-				low = mid
-			}
-			mid = (low + high) / 2
-		}
-	}
-	return mid
 }
