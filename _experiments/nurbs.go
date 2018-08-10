@@ -52,6 +52,7 @@ func (n NURBS) Basis(i, p int, u float64) []float64 {
 	for j := 1; j <= p; j++ {
 		L[j] = u - U[i+1-j] // distance to left bound
 		R[j] = U[i+j] - u   // distance to right bound
+		fmt.Printf("order:%d L:%f R:%f\n", j, L[j], R[j])
 		saved := 0.0
 		for r := 0; r < j; r++ {
 			tmp := N[r] / (R[r+1] + L[j-r])
@@ -83,9 +84,8 @@ func main() {
 	min, max := nurbs.KnotBounds()
 	for i := 0; i < 11; i++ {
 		u := min + float64(i)/10*(max-min)
-		k := nurbs.FindSpan(u)
 		fmt.Println("u", u)
-		fmt.Println("span", k)
-		fmt.Println(u, nurbs.Basis(k, nurbs.Degree, u))
+		k := nurbs.FindSpan(u)
+		fmt.Println(nurbs.Basis(k, nurbs.Degree, u))
 	}
 }
