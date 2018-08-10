@@ -51,8 +51,7 @@ func (im *Importer) ImportPoint(p core.Point) Vector {
 	pre := math.Pow10(im.Precision)
 	x := math.Floor(p.X*pre) / pre
 	y := math.Floor(p.Y*pre) / pre
-	z := math.Floor(p.Z*pre) / pre
-	return Vector{x, y, z}
+	return Vector{x, y}
 }
 
 func (im *Importer) ImportEntity(e entities.Entity) {
@@ -135,8 +134,8 @@ func (im *Importer) ImportArc(e *entities.Arc) {
 func (im *Importer) ImportCircle(e *entities.Circle) {
 	center := im.ImportPoint(e.Center)
 	radius := e.Radius
-	a := center.Sum(Vector{radius, 0, 0})
-	b := center.Sum(Vector{-radius, 0, 0})
+	a := center.Sum(Vector{radius, 0})
+	b := center.Sum(Vector{-radius, 0})
 	p := Path{
 		&Arc{a, b, center, false},
 		&Arc{b, a, center, false},

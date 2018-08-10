@@ -6,11 +6,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var a, b, c, d = Vector{0, 0, 0}, Vector{1, 0, 0}, Vector{2, 0, 0}, Vector{3, 0, 0}
-var e = Vector{1, 1, 0}
+var a, b, c, d = Vector{0, 0}, Vector{1, 0}, Vector{2, 0}, Vector{3, 0}
+var e = Vector{1, 1}
 var ab, bc, cd = &Line{a, b}, &Line{b, c}, &Line{c, d}
 var ba, cb, dc = &Line{b, a}, &Line{c, b}, &Line{d, c}
-var c2 = c.Sum(Vector{EPSILON / 2, 0, 0})
+var c2 = c.Sum(Vector{EPSILON / 2, 0})
 
 func path(points ...Vector) *Path {
 	p := Path{}
