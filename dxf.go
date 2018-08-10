@@ -172,4 +172,18 @@ func (im *Importer) ImportSpline(e *entities.Spline) {
 		v := s.eval(u)
 		fmt.Printf("%f %f\n", v.X, v.Y)
 	}
+	// greville
+	order := s.Degree + 1
+	greLength := len(s.Knots) - order + 1
+	gre := make([]float64, greLength, greLength)
+	for i := 0; i < len(gre); i++ {
+		for j := i; j < i+order; j++ {
+			gre[i] += s.Knots[j]
+		}
+		gre[i] = gre[i] / float64(order)
+	}
+	for _, g := range gre {
+		v := s.eval(g)
+		fmt.Printf("%f %f\n", v.X, v.Y)
+	}
 }
