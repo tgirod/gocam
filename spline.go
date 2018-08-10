@@ -62,3 +62,52 @@ func (s Spline) eval(u float64) Vector {
 	}
 	return res.Divide(div)
 }
+
+// based on https://www.researchgate.net/publication/228411721/
+//
+// If I get this right, this function returns an array containing the influence
+// of p control points the position u ? To use that, I have to first find k,
+// the relevant knot span.
+func (s Spline) basisITS0(k, p int, u float64) []float64 {
+	N := make([]float64, p, p)     // FIXME
+	L := make([]float64, p+1, p+1) // FIXME
+	R := make([]float64, p+1, p+1) // FIXME
+
+	N[0] = 1
+	for j := 1; j <= p; j++ {
+		saved := 0.0
+		L[j] = u - s.Knots[k+1-j] // distance to left bound
+		R[j] = s.Knots[k+j] - u   // distance to right bound
+		for r := 0; r < j; r++ {
+			tmp := N[r] / (R[r+1] + L[j-r])
+			N[r] = saved + R[r+1]*tmp
+			saved = L[j-r] * tmp
+		}
+		N[j] = saved
+	}
+	return N
+}
+
+// based on https://github.com/mfem/mfem/blob/master/mesh/nurbs.cpp#L214
+func (s Spline) findKnotSpan(u float64) int {
+	order := s.Degree + 1
+	var low, mid, high int
+
+	if u == s.Knots[len(s.Controls)+order] {
+		mid = len(s.Controls)
+	} else {
+		low = order
+		high = len(s.Controls) + 1
+		mid = (low + high) / 2
+
+		for (u < s.Knots[mid-1]) || (u > s.Knots[mid]) {
+			if u < s.Knots[mid-1] {
+				high = mid
+			} else {
+				low = mid
+			}
+			mid = (low + high) / 2
+		}
+	}
+	return mid
+}
