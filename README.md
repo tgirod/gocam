@@ -6,6 +6,7 @@ Gocam is a tool to produce Gcode from DXF files in order to pilot a CNC router. 
 - [divide and conquer NURBS into polylines](https://www.bfft.de/en/techblog-eng/bfft-techblog-mai-divide-and-conquer-nurbs-into-polylines/)
 - [time efficient NURBS curve evaluation](https://www.researchgate.net/publication/228411721/download)
 - [FindKnotSpan](https://github.com/mfem/mfem/blob/master/mesh/nurbs.cpp#L214)
+- [NURBS in C](http://www.nar-associates.com/nurbs/c_code.html#chapter4)
 
 # TODO
 
