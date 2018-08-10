@@ -55,26 +55,26 @@ principle is this:
 */
 
 // based on https://github.com/mfem/mfem/blob/master/mesh/nurbs.cpp#L214
-func (s Spline) findKnotSpan(u float64) int {
-	order := s.Degree + 1
-	var low, mid, high int
-	if u == s.Knots[len(s.Controls)+order] {
-		mid = len(s.Controls)
-	} else {
-		low = order
-		high = len(s.Controls) + 1
-		mid = (low + high) / 2
-		for (u < s.Knots[mid-1]) || (u > s.Knots[mid]) {
-			if u < s.Knots[mid-1] {
-				high = mid
-			} else {
-				low = mid
-			}
-			mid = (low + high) / 2
-		}
-	}
-	return mid
-}
+// func (s Spline) findKnotSpan(u float64) int {
+// 	order := s.Degree
+// 	var low, mid, high int
+// 	if u == s.Knots[len(s.Controls)+order] {
+// 		mid = len(s.Controls)
+// 	} else {
+// 		low = order
+// 		high = len(s.Controls) + 1
+// 		mid = (low + high) / 2
+// 		for (u < s.Knots[mid-1]) || (u > s.Knots[mid]) {
+// 			if u < s.Knots[mid-1] {
+// 				high = mid
+// 			} else {
+// 				low = mid
+// 			}
+// 			mid = (low + high) / 2
+// 		}
+// 	}
+// 	return mid
+// }
 
 // based on https://www.researchgate.net/publication/228411721/
 func (s Spline) basisITS0(k, p int, u float64) []float64 {
@@ -95,4 +95,33 @@ func (s Spline) basisITS0(k, p int, u float64) []float64 {
 		N[j] = saved
 	}
 	return N
+}
+
+func (s Spline) eval2(u float64) Vector {
+	P := s.Controls
+	n := len(s.Controls)
+	w := s.Weights
+	k := s.Degree
+	res := Vector{}
+	div := 0.0
+	for i := 0; i < n; i++ {
+		fact := w[i] * s.n(i, k, u)
+		v := P[i].Multiply(fact)
+		res = res.Sum(v)
+		div += fact
+	}
+	return res.Divide(div)
+}
+
+func (s Spline) greville() []float64 {
+	order := s.Degree + 1
+	greLength := len(s.Knots) - order + 1
+	gre := make([]float64, greLength, greLength)
+	for i := 0; i < len(gre); i++ {
+		for j := i; j < i+order; j++ {
+			gre[i] += s.Knots[j]
+		}
+		gre[i] = gre[i] / float64(order)
+	}
+	return gre
 }

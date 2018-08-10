@@ -4,10 +4,10 @@ package main
 // internal representation of the program
 
 import (
-	"fmt"
 	"io"
 	"math"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/rpaloschi/dxf-go/core"
 	"github.com/rpaloschi/dxf-go/document"
 	"github.com/rpaloschi/dxf-go/entities"
@@ -162,28 +162,18 @@ func (im *Importer) ImportSpline(e *entities.Spline) {
 			s.Weights[i] = 1
 		}
 	}
+
 	// FIXME
 	// im.Model.Append(s)
 	// im.Imported++
-	// spew.Dump(s)
-	max := float64(s.Knots[len(s.Knots)-1])
-	for i := 0; i < 100; i++ {
-		u := float64(i) / 100 * max
-		v := s.eval(u)
-		fmt.Printf("%f %f\n", v.X, v.Y)
-	}
-	// greville
-	order := s.Degree + 1
-	greLength := len(s.Knots) - order + 1
-	gre := make([]float64, greLength, greLength)
-	for i := 0; i < len(gre); i++ {
-		for j := i; j < i+order; j++ {
-			gre[i] += s.Knots[j]
-		}
-		gre[i] = gre[i] / float64(order)
-	}
-	for _, g := range gre {
-		v := s.eval(g)
-		fmt.Printf("%f %f\n", v.X, v.Y)
-	}
+	spew.Dump(s)
+	// min := float64(s.Knots[0])
+	// max := float64(s.Knots[len(s.Knots)-1])
+	// steps := 10
+	// for i := 0; i < steps; i++ {
+	// 	u := min + float64(i)/float64(steps)*(max-min)
+	// 	k := s.findKnotSpan(u)
+	// 	fmt.Println(u, k)
+	// }
+	// fmt.Println(s.Knots)
 }
