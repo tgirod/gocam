@@ -1,26 +1,5 @@
 package main
 
-// De Boor's B-Spline evaluation algorithm, based on
-// https://en.wikipedia.org/wiki/De_Boor's_algorithm#Example_implementation
-// k: index of knot interval that contains x
-// x: position
-// t: array of knot positions, needs to be padded
-// c: array of control points
-// p: degree of B-spline
-func deBoor(k int, x float64, t []float64, c []Vector, p int) Vector {
-	// copy control points p+1 control points
-	d := make([]Vector, p+1, p+1)
-	copy(d, c[k-p:k+1])
-
-	for r := 1; r < p+1; r++ {
-		for j := p; j > r-1; j-- {
-			alpha := (x - t[j+k-p]) / (t[j+1+k-r] - t[j+k-p])
-			d[j] = d[j-1].Multiply(1 - alpha).Sum(d[j].Multiply(alpha))
-		}
-	}
-	return d[p]
-}
-
 // implementation based on this ressource:
 // http://web.cs.wpi.edu/~matt/courses/cs563/talks/nurbs.html
 
